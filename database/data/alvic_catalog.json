@@ -1,0 +1,1003 @@
+[
+  {
+    "name": "Agave",
+    "code": "AGAVE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/05/agave-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Agua Marina",
+    "code": "AGUA-MARINA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/agua-marina-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Alhambra 01",
+    "code": "ALHAMBRA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/alhambra-01-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Alhambra 02",
+    "code": "ALHAMBRA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/alhambra-02-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Alhambra 03",
+    "code": "ALHAMBRA-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/alhambra-03-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Almagra",
+    "code": "ALMAGRA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/almagra.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Amarillo Albero",
+    "code": "AMARILLO-ALBERO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/amarillo-albero-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Amarillo Mantequilla",
+    "code": "AMARILLO-MANTEQUILLA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/amarillo-mantequilla-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Anniversary Oak 01",
+    "code": "ANNIVERSARY-OAK-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/anniversary-oak-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Anniversary Oak 02",
+    "code": "ANNIVERSARY-OAK-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/anniversary-oak-02.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Anniversary Oak 03",
+    "code": "ANNIVERSARY-OAK-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/anniversary-oak-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Antracita",
+    "code": "ANTRACITA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/antracita-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Antracita MD",
+    "code": "ANTRACITA-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/antracita-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Antracita Pearl",
+    "code": "ANTRACITA-PEARL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/antracita-pearl.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Arena",
+    "code": "ARENA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/arena.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Azul Índigo",
+    "code": "AZUL-INDIGO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/azul-indigo-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Azul Marino",
+    "code": "AZUL-MARINO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/azul-marino.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Azul Ultramar",
+    "code": "AZUL-ULTRAMAR",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/azul-ultramar-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Basalto",
+    "code": "BASALTO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/basalto-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Basalto MD",
+    "code": "BASALTO-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/basalto-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Basalto Pearl",
+    "code": "BASALTO-PEARL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/pearl-effect-basalto-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Bernini",
+    "code": "BERNINI",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/bernini-450x936.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco",
+    "code": "BLANCO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/blanco-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco Colonial Pearl",
+    "code": "BLANCO-COLONIAL-PEARL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/blanco-colonial-pearl.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco JZ",
+    "code": "BLANCO-JZ",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/02/blanco-jz-1.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco MD",
+    "code": "BLANCO-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/blanco-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco Polar",
+    "code": "BLANCO-POLAR",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/blanco-polar-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco Polar AV",
+    "code": "BLANCO-POLAR-AVANTGARDE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/av-blanco-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco Polar DY",
+    "code": "BLANCO-POLAR-DYNAMIC",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/dy-blanco-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Blanco Polar MI",
+    "code": "BLANCO-POLAR-MINERVA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/new-minerva-blanco-450x919.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Camel",
+    "code": "CAMEL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/camel.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cameo",
+    "code": "CAMEO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/05/cameo-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cashmere",
+    "code": "CASHMERE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cashmere-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cashmere MD",
+    "code": "CASHMERE-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cashmere-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Como Ash 02",
+    "code": "COMO-ASH-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/como-ash-02.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Como Ash 03",
+    "code": "COMO-ASH-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/como-ash-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Coral",
+    "code": "CORAL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/coral-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cotto",
+    "code": "COTTO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cotto.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cross Metal Champagne",
+    "code": "CROSS-METAL-CHAMPAGNE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cross-metal-champagne.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cross Metal Copper",
+    "code": "CROSS-METAL-COPPER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cross-metal-copper.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cross Metal Light Gold",
+    "code": "CROSS-METAL-LIGHT-GOLD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cross-metal-light-gold.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cross Metal Titanio",
+    "code": "CROSS-METAL-TITANIO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cross-metal-titanio.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Cuzco Oro",
+    "code": "CUZCO-ORO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/cuzco-oro.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Dusty Rose",
+    "code": "DUSTY-ROSE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/dusty-rose-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Elitis 01",
+    "code": "ELITIS-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/elitis-01-450x660.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Elitis 02",
+    "code": "ELITIS-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/elitis-02-450x660.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Elitis 03",
+    "code": "ELITIS-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/elitis-03-450x660.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Elitis 04",
+    "code": "ELITIS-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/elitis-04-450x660.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Espresso",
+    "code": "ESPRESSO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/espresso-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Factory 01",
+    "code": "FACTORY-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/factory-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Factory 02",
+    "code": "FACTORY-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/factory-02.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ginger",
+    "code": "GINGER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/ginger.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Goya 01",
+    "code": "GOYA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/goya-01-450x979.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Goya 02",
+    "code": "GOYA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/goya-02-450x979.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Goya 03",
+    "code": "GOYA-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/goya-03-450x979.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris Nube",
+    "code": "GRIS-NUBE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-nube.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris Nube MD",
+    "code": "GRIS-NUBE-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-nube-md-3.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris Perla",
+    "code": "GRIS-PERLA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-perla-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris Plomo",
+    "code": "GRIS-PLOMO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-plomo.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris Plomo Pearl",
+    "code": "GRIS-PLOMO-PEARL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-plomo-pearl-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Gris-2",
+    "code": "GRIS-2",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/gris-02-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ice Blue",
+    "code": "ICE-BLUE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/ice-blue-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ice Cream 01",
+    "code": "ICE-CREAM-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/ice-cream-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ice Cream 04",
+    "code": "ICE-CREAM-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/ice-cream-04.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lakeland Oak 03",
+    "code": "LAKELAND-OAK-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/lakeland-oak-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lavender",
+    "code": "LAVENDER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/lavender-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lino Beige 02",
+    "code": "LINO-BEIGE-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/lino-beige-02-450x636.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lino Dorado 04",
+    "code": "LINO-DORADO-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/lino-dorado-04-2-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lino Marengo 03",
+    "code": "LINO-MARENGO-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/lino-marengo-03-450x636.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Lino Perla 01",
+    "code": "LINO-PERLA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/lino-perla-01-450x636.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Macchiato",
+    "code": "MACCHIATO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/macchiato-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Magnolia",
+    "code": "MAGNOLIA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/magnolia-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Magnolia MD",
+    "code": "MAGNOLIA-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/magnolia-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Mármol Versilia",
+    "code": "MARMOL-VERSILIA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/05/marmol-versilia.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metal Plus Champagne",
+    "code": "METAL-PLUS-CHAMPAGNE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/metal-plus-champagne.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metal Plus Copper",
+    "code": "METAL-PLUS-COPPER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/metal-plus-copper.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metal Plus Light Gold",
+    "code": "METAL-PLUS-LIGHT-GOLD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/12/metal-plus-light-gold.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metal Plus Titanio",
+    "code": "METAL-PLUS-TITANIO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/12/metal-plus-titanio.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metallo 01 Silver",
+    "code": "METALLO-01-SILVER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/metallo-01-silver.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Metallo 04 Grafitt",
+    "code": "METALLO-04-GRAFITT",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/metallo-04-grafitt.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Midnight Purple",
+    "code": "MIDNIGHT-PURPLE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/midnight-purple-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Moonlight Agave",
+    "code": "MOONLIGHT-AGAVE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2026/01/moonlight-agave-web-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Moonlight Blanco",
+    "code": "MOONLIGHT-BLANCO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/moonlight-blanco-web-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Moonlight Metallic Bronze",
+    "code": "MOONLIGHT-METALLIC-BRONZE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2026/01/moonlight-bronze-web-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Moonlight Taupe",
+    "code": "MOONLIGHT-TAUPE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2026/01/moonlight-taupe-web-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Murillo 01",
+    "code": "MURILLO-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/murillo-01-desarrollo-450x979.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Murillo 02",
+    "code": "MURILLO-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/murillo-02-desarrollo-450x979.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Naranja Citrus",
+    "code": "NARANJA-CITRUS",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/naranja-citrus-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro",
+    "code": "NEGRO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/negro-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro AV",
+    "code": "NEGRO-AVANTGARDE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/av-negro-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro DY",
+    "code": "NEGRO-DYNAMIC",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/dy-negro-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro MD",
+    "code": "NEGRO-MD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/negro-md.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro MI",
+    "code": "NEGRO-MINERVA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/new-minerva-negro-450x919.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Negro Pearl",
+    "code": "NEGRO-PEARL",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/pearl-effect-negro-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nocce 01",
+    "code": "NOCCE-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/nocce-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nocce 03",
+    "code": "NOCCE-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/nocce-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nogal Rosales 01",
+    "code": "NOGAL-ROSALES-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/nogal-rosales-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nogal Rosales 02",
+    "code": "NOGAL-ROSALES-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/nogal-rosales-02.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nogal Rosales 03",
+    "code": "NOGAL-ROSALES-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/nogal-rosales-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nogal Rosales 04",
+    "code": "NOGAL-ROSALES-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/nogal-rosales-04-desarrollo-450x944.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nuvola 01",
+    "code": "NUVOLA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/nuvola-01-e1673338831178-450x765.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nuvola 02",
+    "code": "NUVOLA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/nuvola-02-e1673339398649-450x765.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nuvola 03",
+    "code": "NUVOLA-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/nuvola-03-e1673339451913-450x765.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nuvola 04",
+    "code": "NUVOLA-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/nuvola-04-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Nuvola 05",
+    "code": "NUVOLA-05",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/nuvola-05-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ondara 01",
+    "code": "ONDARA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/ondara-01-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Ondara 02",
+    "code": "ONDARA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/ondara-02-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Oxid 01 Silver",
+    "code": "OXID-01-SILVER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/oxid-01-silver.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Oxid 04 Grafitt",
+    "code": "OXID-04-GRAFITT",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/oxid-04-grafitt.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Picasso 01",
+    "code": "PICASSO-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/picasso-01-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Picasso 02",
+    "code": "PICASSO-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/picasso-02-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Picasso 03",
+    "code": "PICASSO-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/picasso-03-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Porcelain 01 Gold",
+    "code": "PORCELAIN-01-GOLD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/porcelain-01-gold.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Porcelain 02 Gold",
+    "code": "PORCELAIN-02-GOLD",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/porcelain-02-gold.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Porcelain 03 Silver",
+    "code": "PORCELAIN-03-SILVER",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/porcelain-03-silver.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Roble Muratti 01",
+    "code": "ROBLE-MURATTI-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/roble-muratti-01.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Roble Muratti 04",
+    "code": "ROBLE-MURATTI-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/roble-muratti-04.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Rojo Pompei",
+    "code": "ROJO-POMPEI",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/02/rojo-pompei-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Siena",
+    "code": "SIENA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/siena-450x675.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Sierra 01",
+    "code": "SIERRA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/sierra-01-450x554.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Sierra 02",
+    "code": "SIERRA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/sierra-02-450x554.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Spatt 01 Blanco",
+    "code": "SPATT-01-BLANCO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/spatt-01-blanco.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Steelboard Aluminio",
+    "code": "STEELBOARD-ALUMINIO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/steelboard-aluminio.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Steelboard Grafito",
+    "code": "STEELBOARD-GRAFITO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/steelboard-grafito.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Stuco 01 Blanco",
+    "code": "STUCO-01-BLANCO",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/stuco-01-blanco.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Taupe",
+    "code": "TAUPE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/05/taupe-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Terra 01",
+    "code": "TERRA-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/terra-01-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Terra 02",
+    "code": "TERRA-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/terra-02-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Tortora",
+    "code": "TORTORA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/tortora.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Trevi 01",
+    "code": "TREVI-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/trevi-01-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Trevi 02",
+    "code": "TREVI-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/trevi-02-450x450.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Urban Grey",
+    "code": "URBAN-GREY",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/urban-grey-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Velázquez 01",
+    "code": "VELAZQUEZ-01",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/velazquez-01-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Velázquez 02",
+    "code": "VELAZQUEZ-02",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2022/12/velazquez-02-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Velázquez 04",
+    "code": "VELAZQUEZ-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/velazquez-04-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Velázquez 05",
+    "code": "VELAZQUEZ-05",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2024/03/velazquez-05-450x975.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Verde Matcha",
+    "code": "VERDE-MATCHA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2025/12/verde-matcha-450x998.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Verde Salvia",
+    "code": "VERDE-SALVIA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/verde-salvia.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Vulcano AV",
+    "code": "VULCANO-AVANTGARDE",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/av-vulcano-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Vulcano DY",
+    "code": "VULCANO-DYNAMIC",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/dy-vulcano-450x1000.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Vulcano MI",
+    "code": "VULCANO-MINERVA",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/01/new-minerva-vulcano-450x919.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Woodline 03",
+    "code": "WOODLINE-03",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2021/11/woodline-03.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  },
+  {
+    "name": "Woodline 04",
+    "code": "WOODLINE-04",
+    "public_image_url": "https://alvic.com/wp-content/uploads/2023/02/woodline-04-450x959.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2750mm * 1240mm"
+  }
+]

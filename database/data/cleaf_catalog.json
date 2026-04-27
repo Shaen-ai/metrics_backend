@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Cheope",
+    "code": "B073",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_cheope/cheope_b073_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Cheope",
+    "code": "U129",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_cheope/cheope_u129_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Idea",
+    "code": "FB80",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_idea/Idea_FB80_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Idea",
+    "code": "FB86",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_idea/Idea_FB86_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Millennium",
+    "code": "S083",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_millennium/Millennium_S083_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Primofiore",
+    "code": "FA33",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_primofiore/Primofiore_FA33_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Quercia",
+    "code": "S182",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_quercia/Quercia_S182_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Quercia",
+    "code": "S203",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_quercia/Quercia_S203_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Riga",
+    "code": "FC18",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_riga/Riga_FC18_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Riga",
+    "code": "LS53",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_riga/Riga_LS53_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Riga",
+    "code": "LS54",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_riga/Riga_LS54_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  },
+  {
+    "name": "Yosemite",
+    "code": "S016",
+    "public_image_url": "https://cleaf.egger.page/cleaf_homepage/cleaf_yosemite/Yosemite_S016_product.jpg",
+    "product_type": "MDF and Laminate",
+    "size": "2070mm * 2800mm"
+  }
+]
