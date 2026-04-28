@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Mail\ResetPasswordMailable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,10 +39,13 @@ class User extends Authenticatable
         'custom_design_key',
         'plan_tier',
         'trial_ends_at',
+        'image3d_bonus_anchor_at',
         'usage_month_start',
         'image3d_generations_this_month',
         'ai_chat_messages_this_month',
         'email_verification_token',
+        'stripe_customer_id',
+        'stripe_subscription_id',
     ];
 
     protected $hidden = [
@@ -59,6 +64,7 @@ class User extends Authenticatable
             'public_site_texts' => 'array',
             'public_site_theme' => 'array',
             'trial_ends_at' => 'datetime',
+            'image3d_bonus_anchor_at' => 'datetime',
             'usage_month_start' => 'date',
         ];
     }
@@ -96,5 +102,16 @@ class User extends Authenticatable
     public function plannerRequests(): HasMany
     {
         return $this->hasMany(PlannerRequest::class, 'admin_id');
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $base = rtrim((string) config('app.frontend_admin_url'), '/');
+        $resetUrl = $base.'/reset-password?'.http_build_query([
+            'email' => $this->getEmailForPasswordReset(),
+            'token' => $token,
+        ]);
+
+        Mail::to($this->email)->send(new ResetPasswordMailable($this, $resetUrl));
     }
 }

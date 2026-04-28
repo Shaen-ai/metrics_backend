@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\MailBranding;
+
 return [
 
     /*
@@ -47,26 +49,29 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'noreply@tunzone.com'),
         /*
-         * PHP does not expand "${APP_NAME}" from .env; treat that literal as "use APP_NAME".
+        /*
+         * Customer-facing From name. Sanitized so internal names containing "mebel" never appear.
          */
-        'name' => (static function () {
-            $fallback = env('APP_NAME', 'Tunzone');
-            $raw = env('MAIL_FROM_NAME');
-            if ($raw === null || $raw === '') {
-                return $fallback;
-            }
-            $trimmed = trim($raw, " \t\n\r\0\x0B\"'");
-            if ($trimmed === '${APP_NAME}') {
-                return $fallback;
-            }
-
-            return $raw;
-        })(),
+        'name' => MailBranding::configuredFromDisplayName(),
     ],
+
+    /*
+    | Logo shown at the top of HTML admin emails. Absolute URL required for mail clients.
+    | Default: FRONTEND_LANDING_URL + /logo.png (see landing public logo).
+    */
+    'brand_logo_url' => (static function () {
+        $explicit = env('MAIL_BRAND_LOGO_URL');
+        if (is_string($explicit) && trim($explicit) !== '') {
+            return trim($explicit);
+        }
+        $base = rtrim((string) env('FRONTEND_LANDING_URL', ''), '/');
+
+        return $base !== '' ? $base.'/logo.png' : null;
+    })(),
 
     'reply_to' => [
         'address' => env('MAIL_REPLY_TO_ADDRESS'),
-        'name' => env('MAIL_REPLY_TO_NAME'),
+        'name' => MailBranding::configuredReplyToDisplayName(),
     ],
 
     'markdown' => [

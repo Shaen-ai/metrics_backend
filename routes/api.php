@@ -9,6 +9,8 @@ use App\Http\Controllers\MaterialTemplateController;
 use App\Http\Controllers\ModeController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Billing\StripeCheckoutController;
+use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\InternalUsageConsumeController;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
-        'name' => 'Mebel API',
+        'name' => config('mail.from.name').' API',
         'version' => '1.0.0',
         'status' => 'running',
     ]);
@@ -99,4 +101,7 @@ Route::post('/planner/generate', [PlannerController::class, 'generate']);
 Route::get('/image-proxy', ImageProxyController::class);
 
 Route::post('/paypal/ipn', [PaypalController::class, 'ipn']);
+
+Route::get('/billing/checkout', [StripeCheckoutController::class, 'redirect']);
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 

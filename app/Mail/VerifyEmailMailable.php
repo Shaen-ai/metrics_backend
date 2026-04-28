@@ -29,7 +29,7 @@ class VerifyEmailMailable extends Mailable
         }
 
         return new Envelope(
-            subject: 'Verify your email — '.config('app.name'),
+            subject: 'Verify your email — '.config('mail.from.name'),
             replyTo: $replyTo,
         );
     }

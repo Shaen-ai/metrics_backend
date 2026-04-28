@@ -32,7 +32,12 @@ class PlanEntitlements
 
     public static function inFirstImage3dBonusWindow(User $user): bool
     {
-        return Carbon::parse($user->created_at)->diffInDays(Carbon::now()) < 30;
+        $anchor = $user->image3d_bonus_anchor_at ?? $user->created_at;
+        if ($anchor === null) {
+            return false;
+        }
+
+        return Carbon::parse($anchor)->diffInDays(Carbon::now()) < 30;
     }
 
     public static function image3dMonthlyCap(User $user): int

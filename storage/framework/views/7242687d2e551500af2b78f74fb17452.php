@@ -1,0 +1,2 @@
+<p style="margin:24px 0 0;font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;"><?php echo e(config('mail.from.name')); ?></p>
+<?php /**PATH /Users/shahen1/apps/mebel/backend/resources/views/emails/partials/branded-footer.blade.php ENDPATH**/ ?>

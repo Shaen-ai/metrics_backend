@@ -3,7 +3,8 @@
 /**
  * Plan entitlements — keep in sync with landing/src/lib/pricing-data.ts (marketing).
  *
- * - image3d_first_month / image3d_ongoing: monthly caps (first 30 days after signup use first_month)
+ * - image3d_first_month / image3d_ongoing: caps — first_month applies for 30 days after
+ *   users.image3d_bonus_anchor_at (set on Stripe subscribe / plan change), else created_at.
  * - ai_chat_monthly: null = unlimited
  *
  * Future: Stripe Billing webhooks (e.g. subscription.updated) can map Price IDs to plan_tier here
