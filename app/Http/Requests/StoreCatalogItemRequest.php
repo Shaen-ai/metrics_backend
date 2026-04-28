@@ -18,7 +18,7 @@ class StoreCatalogItemRequest extends FormRequest
             'sub_mode_id' => ['required', 'exists:sub_modes,id'],
             'name' => ['required', 'string', 'max:255'],
             'model' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'description' => ['required', 'string'],
+            'description' => ['sometimes', 'nullable', 'string'],
             'width' => ['required', 'numeric', 'min:0'],
             'height' => ['required', 'numeric', 'min:0'],
             'depth' => ['required', 'numeric', 'min:0'],

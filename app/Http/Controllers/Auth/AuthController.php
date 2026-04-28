@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
@@ -26,33 +27,74 @@ class AuthController extends Controller
     public function register(SignupRequest $request): JsonResponse
     {
         $plainToken = Str::random(64);
+        /** @var User|null $registered */
+        $registered = null;
 
-        $user = User::create([
-            'id' => Str::uuid()->toString(),
-            'email' => $request->email,
-            'password' => $request->password,
-            'name' => $request->name,
-            'company_name' => $request->company_name,
-            'slug' => Str::slug($request->company_name),
-            'language' => 'en',
-            'currency' => 'AMD',
-            'plan_tier' => 'free',
-            'trial_ends_at' => Carbon::now()->addDays(30),
-            'email_verified_at' => null,
-            'email_verification_token' => Hash::make($plainToken),
-        ]);
+        try {
+            $registered = DB::transaction(function () use ($request, $plainToken) {
+                return User::create([
+                    'id' => Str::uuid()->toString(),
+                    'email' => $request->email,
+                    'password' => $request->password,
+                    'name' => $request->name,
+                    'company_name' => $request->company_name,
+                    'slug' => $this->uniqueSlugForCompany($request->company_name),
+                    'language' => 'en',
+                    'currency' => 'AMD',
+                    'plan_tier' => 'free',
+                    'trial_ends_at' => Carbon::now()->addDays(30),
+                    'email_verified_at' => null,
+                    'email_verification_token' => Hash::make($plainToken),
+                ]);
+            });
 
-        $apiBase = rtrim(config('app.url'), '/');
-        $verificationUrl = $apiBase.'/api/auth/verify-email?'.http_build_query([
-            'email' => $user->email,
-            'token' => $plainToken,
-        ]);
+            $apiBase = rtrim((string) config('app.api_public_url'), '/');
+            /** Email links use `/api/` — same routes as `routes/api.php` (nginx must forward `/api/*` here). */
+            $verificationUrl = $apiBase.'/api/auth/verify-email?'.http_build_query([
+                'email' => $registered->email,
+                'token' => $plainToken,
+            ]);
 
-        Mail::to($user->email)->send(new VerifyEmailMailable($user, $verificationUrl));
+            Mail::to($registered->email)->send(new VerifyEmailMailable($registered, $verificationUrl));
+        } catch (\Throwable $e) {
+            if ($registered !== null) {
+                try {
+                    $registered->delete();
+                } catch (\Throwable $deleteError) {
+                    report($deleteError);
+                }
+            }
+            report($e);
+
+            return response()->json([
+                'message' => 'Registration could not be completed. If this persists, contact support.',
+            ], 503);
+        }
 
         return response()->json([
             'message' => 'Check your email for a link to verify your account before signing in.',
         ], 201);
+    }
+
+    /**
+     * `slug` is unique. Pure `Str::slug($company)` collides for identical names; a short
+     * random suffix keeps signups safe under concurrency (no two rows with the same slug).
+     */
+    private function uniqueSlugForCompany(string $companyName): string
+    {
+        $base = Str::slug($companyName);
+        if ($base === '') {
+            $base = 'store';
+        }
+
+        for ($i = 0; $i < 8; $i++) {
+            $slug = $base.'-'.Str::lower(Str::random(6));
+            if (! User::where('slug', $slug)->exists()) {
+                return $slug;
+            }
+        }
+
+        return $base.'-'.Str::uuid()->toString();
     }
 
     public function verifyEmail(Request $request): RedirectResponse

@@ -1,10 +1,15 @@
 <?php
 
 return [
-    'name' => env('APP_NAME', 'MebelBackend'),
+    'name' => env('APP_NAME', 'Tunzone'),
     'env' => env('APP_ENV', 'production'),
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
+    /**
+     * Public base URL for this API (verification links, etc.). Use when APP_URL is wrong for
+     * external clients (e.g. internal hostname). Defaults to APP_URL.
+     */
+    'api_public_url' => env('API_PUBLIC_URL', env('APP_URL', 'http://localhost')),
     'timezone' => 'UTC',
     'locale' => 'en',
     'fallback_locale' => 'en',

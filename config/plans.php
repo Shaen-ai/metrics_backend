@@ -5,6 +5,9 @@
  *
  * - image3d_first_month / image3d_ongoing: monthly caps (first 30 days after signup use first_month)
  * - ai_chat_monthly: null = unlimited
+ *
+ * Future: Stripe Billing webhooks (e.g. subscription.updated) can map Price IDs to plan_tier here
+ * and set users.plan_tier; expose Customer Portal as NEXT_PUBLIC_BILLING_PORTAL_URL in metrics_platform.
  */
 return [
     'free' => [

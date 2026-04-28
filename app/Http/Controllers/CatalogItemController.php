@@ -28,10 +28,13 @@ class CatalogItemController extends Controller
 
     public function store(StoreCatalogItemRequest $request): JsonResponse
     {
+        $data = $request->safe()->except(['images', 'colors']);
+        $data['description'] = $data['description'] ?? '';
+
         $item = CatalogItem::create([
             'id' => Str::uuid()->toString(),
             'admin_id' => $request->user()->id,
-            ...$request->safe()->except(['images', 'colors']),
+            ...$data,
         ]);
 
         if ($request->has('images')) {
@@ -70,7 +73,11 @@ class CatalogItemController extends Controller
     public function update(UpdateCatalogItemRequest $request, string $id): JsonResponse
     {
         $item = $request->user()->catalogItems()->findOrFail($id);
-        $item->update($request->safe()->except(['images', 'colors']));
+        $data = $request->safe()->except(['images', 'colors']);
+        if (array_key_exists('description', $data)) {
+            $data['description'] = $data['description'] ?? '';
+        }
+        $item->update($data);
 
         if ($request->has('images')) {
             $item->images()->delete();

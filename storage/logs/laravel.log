@@ -1506,3 +1506,13 @@
 #48 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/Users/shahen1/...')
 #49 {main}
 "} 
+[2026-04-27 10:38:37] local.DEBUG: From: MebelBackend <noreply@tunzone.com>
+To: devnull@example.com
+Subject: Tunzone mail test
+MIME-Version: 1.0
+Date: Mon, 27 Apr 2026 10:38:37 +0000
+Message-ID: <5c67f50a383f61cb1e59e7ee1b34f5bc@tunzone.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Laravel mail check  

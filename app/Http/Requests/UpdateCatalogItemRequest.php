@@ -18,7 +18,7 @@ class UpdateCatalogItemRequest extends FormRequest
             'sub_mode_id' => ['sometimes', 'exists:sub_modes,id'],
             'name' => ['sometimes', 'string', 'max:255'],
             'model' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'description' => ['sometimes', 'string'],
+            'description' => ['sometimes', 'nullable', 'string'],
             'width' => ['sometimes', 'numeric', 'min:0'],
             'height' => ['sometimes', 'numeric', 'min:0'],
             'depth' => ['sometimes', 'numeric', 'min:0'],

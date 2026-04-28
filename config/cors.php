@@ -6,8 +6,15 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_ADMIN_URL', 'http://localhost:3000'),
-        env('FRONTEND_PUBLIC_URL', 'http://localhost:3001'),
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        'https://tunzone.com',
+        'https://www.tunzone.com',
+        'https://published.tunzone.com',
+        'https://admin.tunzone.com',
+        'https://api.tunzone.com',
     ],
 
     'allowed_origins_patterns' => [],

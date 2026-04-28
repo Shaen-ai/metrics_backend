@@ -1,6 +1,6 @@
 Hi {{ $user->name }},
 
-Thanks for signing up. Open this link to verify your email and then sign in:
+Thanks for signing up with {{ config('app.name') }}. Open this link to verify your email, then sign in:
 
 {{ $verificationUrl }}
 
