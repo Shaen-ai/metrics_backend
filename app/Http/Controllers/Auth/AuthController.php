@@ -7,11 +7,13 @@ use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SignupRequest;
+use App\Http\Requests\PublishSiteRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\VerifyEmailMailable;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\StorefrontSubdomain;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -88,12 +90,16 @@ class AuthController extends Controller
 
         for ($i = 0; $i < 8; $i++) {
             $slug = $base.'-'.Str::lower(Str::random(6));
-            if (! User::where('slug', $slug)->exists()) {
+            if (! User::where('slug', $slug)->exists() && ! StorefrontSubdomain::isReserved($slug)) {
                 return $slug;
             }
         }
 
-        return $base.'-'.Str::uuid()->toString();
+        do {
+            $fallback = $base.'-'.Str::lower(Str::random(8));
+        } while (User::where('slug', $fallback)->exists() || StorefrontSubdomain::isReserved($fallback));
+
+        return $fallback;
     }
 
     public function verifyEmail(Request $request): RedirectResponse
@@ -180,6 +186,50 @@ class AuthController extends Controller
         return response()->json([
             'user' => new UserResource($user->fresh()),
         ]);
+    }
+
+    public function publishSite(PublishSiteRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->validated();
+        if (isset($data['slug'])) {
+            $user->slug = $data['slug'];
+        }
+        if ($user->site_published_at === null) {
+            $user->site_published_at = now();
+        }
+        $user->save();
+
+        AuditLogger::log($request, $user, 'site.published', User::class, $user->id);
+
+        return response()->json([
+            'user' => new UserResource($user->fresh()),
+        ]);
+    }
+
+    public function subdomainAvailability(Request $request): JsonResponse
+    {
+        $request->validate([
+            'slug' => [
+                'required',
+                'string',
+                'min:1',
+                'max:'.StorefrontSubdomain::MAX_LENGTH,
+                'regex:/^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?$/',
+            ],
+        ]);
+
+        $slug = (string) $request->query('slug');
+        if (! StorefrontSubdomain::formatIsValid($slug)) {
+            return response()->json(['available' => false]);
+        }
+        if (StorefrontSubdomain::isReserved($slug)) {
+            return response()->json(['available' => false]);
+        }
+
+        $taken = User::where('slug', $slug)->where('id', '!=', $request->user()->id)->exists();
+
+        return response()->json(['available' => ! $taken]);
     }
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse

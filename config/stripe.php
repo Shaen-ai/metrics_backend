@@ -4,13 +4,12 @@
  * Stripe subscription checkout — price IDs must match Dashboard products.
  * plan_tier values align with config/plans.php keys.
  */
-
 $priceToTier = [];
 foreach ([
     'STRIPE_PRICE_STARTER_MONTHLY' => 'starter',
     'STRIPE_PRICE_STARTER_YEARLY' => 'starter',
-    'STRIPE_PRICE_BUSINESS_MONTHLY' => 'growth',
-    'STRIPE_PRICE_BUSINESS_YEARLY' => 'growth',
+    'STRIPE_PRICE_BUSINESS_MONTHLY' => 'business',
+    'STRIPE_PRICE_BUSINESS_YEARLY' => 'business',
     'STRIPE_PRICE_BUSINESS_PRO_MONTHLY' => 'business_pro',
     'STRIPE_PRICE_BUSINESS_PRO_YEARLY' => 'business_pro',
 ] as $envKey => $tier) {

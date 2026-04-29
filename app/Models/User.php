@@ -46,6 +46,7 @@ class User extends Authenticatable
         'email_verification_token',
         'stripe_customer_id',
         'stripe_subscription_id',
+        'site_published_at',
     ];
 
     protected $hidden = [
@@ -66,6 +67,7 @@ class User extends Authenticatable
             'trial_ends_at' => 'datetime',
             'image3d_bonus_anchor_at' => 'datetime',
             'usage_month_start' => 'date',
+            'site_published_at' => 'datetime',
         ];
     }
 

@@ -3,6 +3,8 @@
 /**
  * Plan entitlements — keep in sync with landing/src/lib/pricing-data.ts (marketing).
  *
+ * Paid tier keys (plan_tier): starter, business, business_pro, enterprise.
+ *
  * - image3d_first_month / image3d_ongoing: caps — first_month applies for 30 days after
  *   users.image3d_bonus_anchor_at (set on Stripe subscribe / plan change), else created_at.
  * - ai_chat_monthly: null = unlimited
@@ -38,7 +40,7 @@ return [
         'custom_theme' => false,
         'bespoke_design' => false,
     ],
-    'growth' => [
+    'business' => [
         'image3d_first_month' => 200,
         'image3d_ongoing' => 55,
         'ai_chat_monthly' => 200,
@@ -48,17 +50,7 @@ return [
         'custom_theme' => false,
         'bespoke_design' => false,
     ],
-    'scale' => [
-        'image3d_first_month' => 400,
-        'image3d_ongoing' => 100,
-        'ai_chat_monthly' => null,
-        'priority_processing' => true,
-        'custom_domain' => true,
-        'published_layouts' => false,
-        'custom_theme' => false,
-        'bespoke_design' => false,
-    ],
-    /** Business Pro — same entitlements as Scale; used for migrated / premium workspaces. */
+    /** Business Pro — higher quotas and advanced publishing/theme; migrated / premium workspaces. */
     'business_pro' => [
         'image3d_first_month' => 400,
         'image3d_ongoing' => 100,

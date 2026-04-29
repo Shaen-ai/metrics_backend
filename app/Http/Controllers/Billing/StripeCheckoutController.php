@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Billing;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Billing\StripePlanResolver;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,35 +16,44 @@ use Stripe\Stripe;
 
 class StripeCheckoutController extends Controller
 {
-    public function redirect(Request $request): RedirectResponse|Response
+    public function redirect(Request $request): RedirectResponse|Response|JsonResponse
     {
         $secret = config('stripe.secret');
         if (! is_string($secret) || $secret === '') {
-            return response(
-                'Stripe billing is not configured. Set STRIPE_SECRET in backend/.env (test key: '
-                .'https://dashboard.stripe.com/test/apikeys), then run: php artisan config:clear',
-                503,
-            );
+            $message = 'Stripe billing is not configured. Set STRIPE_SECRET in backend/.env (test key: '
+                .'https://dashboard.stripe.com/test/apikeys), then run: php artisan config:clear';
+
+            return $request->wantsJson()
+                ? response()->json(['message' => $message], 503)
+                : response($message, 503);
         }
 
         $tier = $request->query('tier');
         $interval = $request->query('interval');
 
         if (! is_string($tier) || ! is_string($interval)) {
-            return response('Invalid tier or interval.', 422);
+            return $request->wantsJson()
+                ? response()->json(['message' => 'Invalid tier or interval.'], 422)
+                : response('Invalid tier or interval.', 422);
         }
 
         if (! in_array($tier, ['starter', 'business', 'business-pro'], true)) {
-            return response('Invalid tier.', 422);
+            return $request->wantsJson()
+                ? response()->json(['message' => 'Invalid tier.'], 422)
+                : response('Invalid tier.', 422);
         }
 
         if (! in_array($interval, ['month', 'year'], true)) {
-            return response('Invalid interval. Use month or year.', 422);
+            return $request->wantsJson()
+                ? response()->json(['message' => 'Invalid interval. Use month or year.'], 422)
+                : response('Invalid interval. Use month or year.', 422);
         }
 
         $resolved = StripePlanResolver::checkoutPriceForTier($tier, $interval);
         if ($resolved === null) {
-            return response('Invalid price configuration for this tier.', 503);
+            return $request->wantsJson()
+                ? response()->json(['message' => 'Invalid price configuration for this tier.'], 503)
+                : response('Invalid price configuration for this tier.', 503);
         }
         [$priceId] = $resolved;
 
@@ -53,7 +63,9 @@ class StripeCheckoutController extends Controller
         $landingBase = rtrim((string) env('FRONTEND_LANDING_URL', ''), '/');
 
         if ($adminBase === '') {
-            return response('FRONTEND_ADMIN_URL is not configured.', 503);
+            return $request->wantsJson()
+                ? response()->json(['message' => 'FRONTEND_ADMIN_URL is not configured.'], 503)
+                : response('FRONTEND_ADMIN_URL is not configured.', 503);
         }
         if ($landingBase === '') {
             $landingBase = $adminBase;
@@ -106,7 +118,15 @@ class StripeCheckoutController extends Controller
         } catch (ApiErrorException $e) {
             report($e);
 
-            return response('Could not start checkout. '.$e->getMessage(), 502);
+            $message = 'Could not start checkout. '.$e->getMessage();
+
+            return $request->wantsJson()
+                ? response()->json(['message' => $message], 502)
+                : response($message, 502);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['url' => $session->url]);
         }
 
         return redirect()->away($session->url);

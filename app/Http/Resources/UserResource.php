@@ -16,6 +16,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'companyName' => $this->company_name,
             'slug' => $this->slug,
+            'sitePublishedAt' => $this->site_published_at?->toISOString(),
             'selectedModeId' => $this->selected_mode_id,
             'selectedSubModeIds' => $this->selected_sub_mode_ids ?? [],
             'logo' => $this->logo,
@@ -31,7 +32,7 @@ class UserResource extends JsonResource
             'publicSiteTheme' => $this->public_site_theme ?? [],
             'customDesignKey' => $this->custom_design_key,
             'createdAt' => $this->created_at?->toISOString(),
-            'planTier' => $this->plan_tier ?? 'free',
+            'planTier' => PlanEntitlements::normalizePlanTier($this->plan_tier ?? 'free'),
             'trialEndsAt' => $this->trial_ends_at?->toISOString(),
             'entitlements' => PlanEntitlements::toPublicArray($this->resource),
         ];

@@ -7,6 +7,18 @@ use Carbon\Carbon;
 
 class PlanEntitlements
 {
+    /** Map legacy DB/config slugs to canonical plan_tier keys. */
+    public static function normalizePlanTier(?string $raw): string
+    {
+        $t = $raw ?? 'free';
+
+        return match ($t) {
+            'growth' => 'business',
+            'scale' => 'business_pro',
+            default => $t,
+        };
+    }
+
     /**
      * True when Stripe subscription exists, or billing tier stored on the user matches a paid row in config/plans.php.
      * The latter covers enterprise invoices, migrations (e.g. business_pro grandfather), and Stripe↔DB sync lag where
@@ -24,6 +36,7 @@ class PlanEntitlements
     /** plan_tier keys that map to a real plan row (not `free`; excludes meta key `unsubscribed`). */
     private static function hasPaidPlanTierInConfig(string $tier): bool
     {
+        $tier = self::normalizePlanTier($tier);
         if ($tier === '' || $tier === 'free' || $tier === 'unsubscribed') {
             return false;
         }
@@ -53,7 +66,7 @@ class PlanEntitlements
             return [];
         }
 
-        $tier = $user->plan_tier ?? 'free';
+        $tier = self::normalizePlanTier($user->plan_tier ?? 'free');
         $row = config("plans.{$tier}");
         if (! is_array($row)) {
             $row = config('plans.unsubscribed');
@@ -82,7 +95,11 @@ class PlanEntitlements
 
     public static function aiChatMonthlyCap(User $user): ?int
     {
-        $v = self::basePlanRow($user)['ai_chat_monthly'] ?? 0;
+        $row = self::basePlanRow($user);
+        if (! array_key_exists('ai_chat_monthly', $row)) {
+            return 0;
+        }
+        $v = $row['ai_chat_monthly'];
 
         return $v === null ? null : (int) $v;
     }
@@ -153,7 +170,7 @@ class PlanEntitlements
         $imgCap = self::image3dMonthlyCap($user);
 
         return [
-            'planTier' => $user->plan_tier,
+            'planTier' => self::normalizePlanTier($user->plan_tier ?? 'free'),
             'trialEndsAt' => $user->trial_ends_at?->toISOString(),
             'onTrial' => self::onActiveTrial($user),
             'subscriptionActive' => $hasSub,

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Support\PlanEntitlements;
+use App\Support\StorefrontSubdomain;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -30,6 +31,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'company_name' => ['sometimes', 'string', 'max:255'],
+            'slug' => array_merge(['sometimes'], StorefrontSubdomain::slugRules($this->user()->id)),
             'logo' => ['sometimes', 'nullable', 'string'],
             'language' => ['sometimes', 'in:en,ru'],
             'currency' => ['sometimes', 'string', 'max:10'],
@@ -78,6 +80,16 @@ class UpdateProfileRequest extends FormRequest
 
             if ($this->filled('custom_design_key') && ! PlanEntitlements::allowsBespokeDesign($user)) {
                 $validator->errors()->add('custom_design_key', 'Bespoke designs are available on Enterprise plans.');
+            }
+        });
+
+        $validator->after(function (Validator $validator): void {
+            $slug = $this->input('slug');
+            if (! is_string($slug) || $slug === '') {
+                return;
+            }
+            if (StorefrontSubdomain::isReserved($slug)) {
+                $validator->errors()->add('slug', 'This subdomain is reserved.');
             }
         });
     }

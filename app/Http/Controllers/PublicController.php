@@ -21,6 +21,17 @@ class PublicController extends Controller
         return User::where('slug', $slug)->firstOrFail();
     }
 
+    private function ensureSitePublished(User $admin): ?JsonResponse
+    {
+        if ($admin->site_published_at === null) {
+            return response()->json([
+                'message' => 'Not found.',
+            ], 404);
+        }
+
+        return null;
+    }
+
     private function ensureStorefrontSubscribed(User $admin): ?JsonResponse
     {
         if (! PlanEntitlements::hasActiveSubscription($admin)) {
@@ -35,6 +46,9 @@ class PublicController extends Controller
     public function admin(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }
@@ -47,6 +61,9 @@ class PublicController extends Controller
     public function entitlements(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }
@@ -59,6 +76,9 @@ class PublicController extends Controller
     public function catalog(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }
@@ -110,6 +130,9 @@ class PublicController extends Controller
     public function materials(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }
@@ -127,6 +150,9 @@ class PublicController extends Controller
     public function modules(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }
@@ -145,6 +171,9 @@ class PublicController extends Controller
     public function submitOrder(PublicOrderRequest $request, string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureSitePublished($admin)) {
+            return $blocked;
+        }
         if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
             return $blocked;
         }

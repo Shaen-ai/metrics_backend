@@ -74,6 +74,13 @@ return [
         'name' => MailBranding::configuredReplyToDisplayName(),
     ],
 
+    /*
+    | Landing / marketing contact form (about page). Must be a real inbox.
+    */
+    'contact_inbound' => [
+        'address' => env('CONTACT_INBOUND_EMAIL', 'support@tunzone.com'),
+    ],
+
     'markdown' => [
         'theme' => env('MAIL_MARKDOWN_THEME', 'default'),
 

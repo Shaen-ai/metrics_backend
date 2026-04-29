@@ -14,6 +14,7 @@ use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\InternalUsageConsumeController;
+use App\Http\Controllers\ContactFormController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\UsageConsumeController;
 use Illuminate\Support\Facades\Route;
@@ -46,11 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::put('/auth/me', [AuthController::class, 'updateProfile']);
+    Route::get('/auth/subdomain-availability', [AuthController::class, 'subdomainAvailability']);
     /** Needed for onboarding (choose mode/sub-modes before other subscribed features). */
     Route::get('/modes', [ModeController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
+    Route::post('/auth/publish-site', [AuthController::class, 'publishSite']);
     Route::post('/usage/consume', [UsageConsumeController::class, 'consume']);
 
     Route::post('/upload-image', [\App\Http\Controllers\UploadController::class, 'store']);
@@ -82,6 +85,9 @@ Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/public/material-templates', [MaterialTemplateController::class, 'index']);
+
+Route::post('/contact', [ContactFormController::class, 'store'])
+    ->middleware('throttle:20,1');
 
 /*
 |--------------------------------------------------------------------------
