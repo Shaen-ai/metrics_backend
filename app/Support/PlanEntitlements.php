@@ -4,30 +4,62 @@ namespace App\Support;
 
 use App\Models\User;
 use Carbon\Carbon;
+
 class PlanEntitlements
 {
+    /**
+     * True when Stripe subscription exists, or billing tier stored on the user matches a paid row in config/plans.php.
+     * The latter covers enterprise invoices, migrations (e.g. business_pro grandfather), and Stripe↔DB sync lag where
+     * plan_tier is set before stripe_subscription_id is written.
+     */
+    public static function hasActiveSubscription(User $user): bool
+    {
+        if (($user->stripe_subscription_id ?? '') !== '') {
+            return true;
+        }
+
+        return self::hasPaidPlanTierInConfig($user->plan_tier ?? 'free');
+    }
+
+    /** plan_tier keys that map to a real plan row (not `free`; excludes meta key `unsubscribed`). */
+    private static function hasPaidPlanTierInConfig(string $tier): bool
+    {
+        if ($tier === '' || $tier === 'free' || $tier === 'unsubscribed') {
+            return false;
+        }
+
+        return is_array(config("plans.{$tier}"));
+    }
+
+    /** Stripe Billing trial window (requires payment method — no cardless product tier). */
     public static function onActiveTrial(User $user): bool
     {
+        if (! self::hasActiveSubscription($user)) {
+            return false;
+        }
+
         return $user->trial_ends_at !== null && Carbon::now()->lt($user->trial_ends_at);
     }
 
     /** @return array<string, mixed> */
     public static function basePlanRow(User $user): array
     {
+        if (! self::hasActiveSubscription($user)) {
+            $unsubscribed = config('plans.unsubscribed');
+            if (is_array($unsubscribed)) {
+                return $unsubscribed;
+            }
+
+            return [];
+        }
+
         $tier = $user->plan_tier ?? 'free';
         $row = config("plans.{$tier}");
         if (! is_array($row)) {
-            $row = config('plans.free');
+            $row = config('plans.unsubscribed');
         }
 
-        if (($tier === 'free') && self::onActiveTrial($user)) {
-            $trialRow = config('plans.growth');
-            if (is_array($trialRow)) {
-                $row = $trialRow;
-            }
-        }
-
-        return $row;
+        return is_array($row) ? $row : [];
     }
 
     public static function inFirstImage3dBonusWindow(User $user): bool
@@ -50,24 +82,27 @@ class PlanEntitlements
 
     public static function aiChatMonthlyCap(User $user): ?int
     {
-        $v = self::basePlanRow($user)['ai_chat_monthly'] ?? 20;
+        $v = self::basePlanRow($user)['ai_chat_monthly'] ?? 0;
 
         return $v === null ? null : (int) $v;
     }
 
     public static function allowsPublishedLayouts(User $user): bool
     {
-        return (bool) (self::basePlanRow($user)['published_layouts'] ?? false);
+        return self::hasActiveSubscription($user)
+            && (bool) (self::basePlanRow($user)['published_layouts'] ?? false);
     }
 
     public static function allowsCustomTheme(User $user): bool
     {
-        return (bool) (self::basePlanRow($user)['custom_theme'] ?? false);
+        return self::hasActiveSubscription($user)
+            && (bool) (self::basePlanRow($user)['custom_theme'] ?? false);
     }
 
     public static function allowsBespokeDesign(User $user): bool
     {
-        return (bool) (self::basePlanRow($user)['bespoke_design'] ?? false);
+        return self::hasActiveSubscription($user)
+            && (bool) (self::basePlanRow($user)['bespoke_design'] ?? false);
     }
 
     public static function normalizeUsageMonth(User $user): void
@@ -113,6 +148,7 @@ class PlanEntitlements
     {
         self::normalizeUsageMonth($user);
         $user->refresh();
+        $hasSub = self::hasActiveSubscription($user);
         $aiCap = self::aiChatMonthlyCap($user);
         $imgCap = self::image3dMonthlyCap($user);
 
@@ -120,11 +156,12 @@ class PlanEntitlements
             'planTier' => $user->plan_tier,
             'trialEndsAt' => $user->trial_ends_at?->toISOString(),
             'onTrial' => self::onActiveTrial($user),
+            'subscriptionActive' => $hasSub,
             'aiChatMonthlyLimit' => $aiCap,
             'aiChatRemaining' => self::aiChatRemaining($user),
             'image3dMonthlyLimit' => $imgCap,
             'image3dRemaining' => self::image3dRemaining($user),
-            'inFirstImage3dBonusWindow' => self::inFirstImage3dBonusWindow($user),
+            'inFirstImage3dBonusWindow' => $hasSub && self::inFirstImage3dBonusWindow($user),
             'publishedLayouts' => self::allowsPublishedLayouts($user),
             'customTheme' => self::allowsCustomTheme($user),
             'bespokeDesign' => self::allowsBespokeDesign($user),
@@ -133,6 +170,9 @@ class PlanEntitlements
 
     public static function consumeImage3d(User $user): bool
     {
+        if (! self::hasActiveSubscription($user)) {
+            return false;
+        }
         self::normalizeUsageMonth($user);
         $user->refresh();
         if (self::image3dRemaining($user) <= 0) {
@@ -145,6 +185,9 @@ class PlanEntitlements
 
     public static function consumeAiChat(User $user): bool
     {
+        if (! self::hasActiveSubscription($user)) {
+            return false;
+        }
         self::normalizeUsageMonth($user);
         $user->refresh();
         $cap = self::aiChatMonthlyCap($user);

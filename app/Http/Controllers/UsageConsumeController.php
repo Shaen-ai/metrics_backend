@@ -15,6 +15,13 @@ class UsageConsumeController extends Controller
         ]);
         $user = $request->user();
 
+        if (! PlanEntitlements::hasActiveSubscription($user)) {
+            return response()->json([
+                'message' => 'An active subscription is required.',
+                'entitlements' => PlanEntitlements::toPublicArray($user->fresh()),
+            ], 403);
+        }
+
         if ($data['feature'] === 'image3d') {
             if (! PlanEntitlements::consumeImage3d($user)) {
                 return response()->json([

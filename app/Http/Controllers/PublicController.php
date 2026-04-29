@@ -21,9 +21,23 @@ class PublicController extends Controller
         return User::where('slug', $slug)->firstOrFail();
     }
 
+    private function ensureStorefrontSubscribed(User $admin): ?JsonResponse
+    {
+        if (! PlanEntitlements::hasActiveSubscription($admin)) {
+            return response()->json([
+                'message' => 'This workspace does not have an active subscription.',
+            ], 403);
+        }
+
+        return null;
+    }
+
     public function admin(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         return response()->json([
             'data' => new AdminPublicResource($admin),
@@ -33,6 +47,9 @@ class PublicController extends Controller
     public function entitlements(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         return response()->json([
             'data' => PlanEntitlements::toPublicArray($admin),
@@ -42,6 +59,9 @@ class PublicController extends Controller
     public function catalog(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         $query = $admin->catalogItems()
             ->where('is_active', true)
@@ -90,6 +110,9 @@ class PublicController extends Controller
     public function materials(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         $materials = $admin->materials()
             ->where('is_active', true)
@@ -104,6 +127,9 @@ class PublicController extends Controller
     public function modules(string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         $modules = $admin->modules()
             ->where('is_active', true)
@@ -119,6 +145,9 @@ class PublicController extends Controller
     public function submitOrder(PublicOrderRequest $request, string $slug): JsonResponse
     {
         $admin = $this->findAdmin($slug);
+        if ($blocked = $this->ensureStorefrontSubscribed($admin)) {
+            return $blocked;
+        }
 
         $order = Order::create([
             'id' => Str::uuid()->toString(),

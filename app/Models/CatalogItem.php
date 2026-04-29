@@ -27,6 +27,7 @@ class CatalogItem extends Model
         'currency',
         'delivery_days',
         'category',
+        'additional_categories',
         'is_active',
         'model_url',
         'model_job_id',
@@ -43,6 +44,7 @@ class CatalogItem extends Model
             'price' => 'decimal:2',
             'delivery_days' => 'integer',
             'is_active' => 'boolean',
+            'additional_categories' => 'array',
         ];
     }
 
@@ -69,5 +71,33 @@ class CatalogItem extends Model
     public function colors(): HasMany
     {
         return $this->hasMany(CatalogItemColor::class);
+    }
+
+    /**
+     * Primary `category` plus optional extra placements (e.g. show same chair under Kitchen).
+     *
+     * @return list<string>
+     */
+    public function mergedCategoryLabels(): array
+    {
+        $primary = trim((string) ($this->category ?? ''));
+        $extra = is_array($this->additional_categories) ? $this->additional_categories : [];
+        $out = [];
+        $seenLower = [];
+
+        foreach (array_merge($primary !== '' ? [$primary] : [], $extra) as $s) {
+            $t = is_string($s) ? trim($s) : '';
+            if ($t === '') {
+                continue;
+            }
+            $lk = strtolower($t);
+            if (isset($seenLower[$lk])) {
+                continue;
+            }
+            $seenLower[$lk] = true;
+            $out[] = $t;
+        }
+
+        return $out;
     }
 }

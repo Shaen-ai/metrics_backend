@@ -27,6 +27,8 @@ class UpdateCatalogItemRequest extends FormRequest
             'currency' => ['sometimes', 'string', 'max:10'],
             'delivery_days' => ['sometimes', 'integer', 'min:1'],
             'category' => ['sometimes', 'string', 'max:255'],
+            'additional_categories' => ['sometimes', 'nullable', 'array', 'max:50'],
+            'additional_categories.*' => ['string', 'max:120'],
             'is_active' => ['sometimes', 'boolean'],
             'images' => ['sometimes', 'array'],
             'images.*' => ['string'],

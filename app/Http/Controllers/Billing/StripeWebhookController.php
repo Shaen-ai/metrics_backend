@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Billing;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Billing\StripePlanResolver;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -116,6 +117,7 @@ class StripeWebhookController extends Controller
             'stripe_subscription_id' => $subscriptionId,
         ]);
         $fields['image3d_bonus_anchor_at'] = now();
+        $fields['trial_ends_at'] = $this->trialEndsAtFromStripeSubscription($subscription);
         $user->update($fields);
     }
 
@@ -139,6 +141,7 @@ class StripeWebhookController extends Controller
             'plan_tier' => 'free',
             'stripe_subscription_id' => null,
             'image3d_bonus_anchor_at' => null,
+            'trial_ends_at' => null,
         ]);
     }
 
@@ -181,7 +184,10 @@ class StripeWebhookController extends Controller
 
         if (in_array($status, ['active', 'trialing', 'past_due'], true) && $planTier !== null) {
             $oldTier = $user->plan_tier;
-            $payload = ['plan_tier' => $planTier];
+            $payload = [
+                'plan_tier' => $planTier,
+                'trial_ends_at' => $this->trialEndsAtFromStripeSubscription($sub),
+            ];
             if ($oldTier !== $planTier) {
                 $payload['image3d_bonus_anchor_at'] = now();
             }
@@ -195,6 +201,7 @@ class StripeWebhookController extends Controller
                 'plan_tier' => 'free',
                 'stripe_subscription_id' => null,
                 'image3d_bonus_anchor_at' => null,
+                'trial_ends_at' => null,
             ]);
         }
     }
@@ -228,5 +235,17 @@ class StripeWebhookController extends Controller
         }
 
         return null;
+    }
+
+    /** Future trial_end only — cleared after trial completes or Stripe omits trial_end. */
+    private function trialEndsAtFromStripeSubscription(Subscription $sub): ?Carbon
+    {
+        $end = $sub->trial_end ?? null;
+        if ($end === null || $end === '') {
+            return null;
+        }
+        $c = Carbon::createFromTimestamp((int) $end);
+
+        return $c->isFuture() ? $c : null;
     }
 }

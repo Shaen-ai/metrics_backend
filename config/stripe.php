@@ -45,4 +45,7 @@ return [
 
     /** Stripe Price ID => plan_tier slug (for webhooks). */
     'price_plan_tiers' => $priceToTier,
+
+    /** Checkout Session subscription trial (days). Set 0 to disable. Requires payment method on file before trial. */
+    'subscription_trial_days' => max(0, (int) env('STRIPE_SUBSCRIPTION_TRIAL_DAYS', 14)),
 ];

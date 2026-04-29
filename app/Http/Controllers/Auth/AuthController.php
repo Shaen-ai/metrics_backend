@@ -12,7 +12,6 @@ use App\Http\Resources\UserResource;
 use App\Mail\VerifyEmailMailable;
 use App\Models\User;
 use App\Support\AuditLogger;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,7 +41,7 @@ class AuthController extends Controller
                     'language' => 'en',
                     'currency' => 'AMD',
                     'plan_tier' => 'free',
-                    'trial_ends_at' => Carbon::now()->addDays(30),
+                    'trial_ends_at' => null,
                     'email_verified_at' => null,
                     'email_verification_token' => Hash::make($plainToken),
                 ]);

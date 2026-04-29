@@ -29,6 +29,13 @@ class InternalUsageConsumeController extends Controller
             return response()->json(['message' => 'Unknown storefront.'], 404);
         }
 
+        if (! PlanEntitlements::hasActiveSubscription($user)) {
+            return response()->json([
+                'message' => 'This workspace does not have an active subscription.',
+                'entitlements' => PlanEntitlements::toPublicArray($user->fresh()),
+            ], 403);
+        }
+
         if ($data['feature'] === 'image3d') {
             if (! PlanEntitlements::consumeImage3d($user)) {
                 return response()->json([

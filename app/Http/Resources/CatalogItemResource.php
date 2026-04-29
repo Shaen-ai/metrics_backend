@@ -30,6 +30,8 @@ class CatalogItemResource extends JsonResource
             'currency' => $this->currency,
             'deliveryDays' => $this->delivery_days,
             'category' => $this->category,
+            'additionalCategories' => $this->additional_categories ?? [],
+            'allCategories' => $this->mergedCategoryLabels(),
             'availableColors' => $this->whenLoaded('colors', fn () =>
                 $this->colors->map(fn ($c) => ['name' => $c->name, 'hex' => $c->hex])->toArray()
             ),

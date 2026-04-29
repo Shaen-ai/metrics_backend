@@ -46,9 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::put('/auth/me', [AuthController::class, 'updateProfile']);
-    Route::post('/usage/consume', [UsageConsumeController::class, 'consume']);
-
+    /** Needed for onboarding (choose mode/sub-modes before other subscribed features). */
     Route::get('/modes', [ModeController::class, 'index']);
+});
+
+Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
+    Route::post('/usage/consume', [UsageConsumeController::class, 'consume']);
 
     Route::post('/upload-image', [\App\Http\Controllers\UploadController::class, 'store']);
     Route::post('/upload-material-image', [\App\Http\Controllers\UploadController::class, 'storeMaterialImage']);

@@ -6,15 +6,22 @@
  * - image3d_first_month / image3d_ongoing: caps — first_month applies for 30 days after
  *   users.image3d_bonus_anchor_at (set on Stripe subscribe / plan change), else created_at.
  * - ai_chat_monthly: null = unlimited
+ * - unsubscribed: no Stripe subscription (plan_tier "free"); all usage blocked — there is no free product tier.
  *
- * Future: Stripe Billing webhooks (e.g. subscription.updated) can map Price IDs to plan_tier here
+ * tiers_without_stripe_subscription: plan_tier slugs with full access without stripe_subscription_id (e.g. manual Enterprise invoices).
+ *
+ * Future: Stripe Billing webhooks map Price IDs to plan_tier here
  * and set users.plan_tier; expose Customer Portal as NEXT_PUBLIC_BILLING_PORTAL_URL in metrics_platform.
  */
 return [
-    'free' => [
-        'image3d_first_month' => 10,
-        'image3d_ongoing' => 3,
-        'ai_chat_monthly' => 20,
+    'tiers_without_stripe_subscription' => [
+        'enterprise',
+    ],
+
+    'unsubscribed' => [
+        'image3d_first_month' => 0,
+        'image3d_ongoing' => 0,
+        'ai_chat_monthly' => 0,
         'priority_processing' => false,
         'custom_domain' => false,
         'published_layouts' => false,

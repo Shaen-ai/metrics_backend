@@ -70,6 +70,8 @@ class StripeCheckoutController extends Controller
         Stripe::setApiKey($secret);
 
         try {
+            $trialDays = (int) config('stripe.subscription_trial_days', 14);
+
             $params = [
                 'mode' => 'subscription',
                 'line_items' => [
@@ -82,6 +84,13 @@ class StripeCheckoutController extends Controller
                     'interval' => $interval,
                 ]),
             ];
+
+            // Deferred first charge: subscription is `trialing`; recurring price invoices after trial (card on file).
+            if ($trialDays > 0) {
+                $params['subscription_data'] = [
+                    'trial_period_days' => $trialDays,
+                ];
+            }
 
             if ($user !== null) {
                 $params['client_reference_id'] = $user->id;

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Support\PlanEntitlements;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
@@ -33,6 +34,10 @@ class PlanGenerateRequest extends FormRequest
             throw ValidationException::withMessages([
                 'admin_slug' => ['Storefront not found.'],
             ]);
+        }
+
+        if (! PlanEntitlements::hasActiveSubscription($admin)) {
+            abort(403, 'This workspace does not have an active subscription.');
         }
 
         return $admin;
