@@ -16,6 +16,19 @@ return [
         'premium-showroom',
     ],
 
+    'default_catalog_layout' => 'grid',
+
+    'catalog_layouts' => [
+        'grid',
+        'list',
+        'masonry',
+        'magazine',
+        'showcase',
+        'reels',
+        'commerce',
+        'gallery',
+    ],
+
     'text_keys' => [
         'heroTitle',
         'heroSubtitle',

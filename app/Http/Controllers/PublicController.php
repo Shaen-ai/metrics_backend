@@ -100,7 +100,7 @@ class PublicController extends Controller
 
         $aiRoomCatalogOnly = $subModeSlug === 'ai-room';
 
-        if (! $admin->use_custom_planner_catalog && ! $aiRoomCatalogOnly) {
+        if (request()->boolean('include_library') && ! $admin->use_custom_planner_catalog && ! $aiRoomCatalogOnly) {
             $librarySlug = (string) config('app.catalog_library_slug', 'demo');
             $libraryUser = User::where('slug', $librarySlug)->first();
             if ($libraryUser && $libraryUser->id !== $admin->id) {

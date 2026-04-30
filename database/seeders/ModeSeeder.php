@@ -40,21 +40,6 @@ class ModeSeeder extends Seeder
                     ['id' => 'sub-headboards', 'name' => 'Headboards', 'slug' => 'headboards', 'description' => 'Upholstered, tufted, panel headboards', 'icon' => 'RectangleHorizontal'],
                 ],
             ],
-            [
-                'id' => 'mode-doors-windows',
-                'name' => 'Doors & Windows',
-                'slug' => 'doors-windows',
-                'description' => 'Interior and exterior doors and windows',
-                'icon' => 'DoorOpen',
-                'subModes' => [
-                    ['id' => 'sub-interior-doors', 'name' => 'Interior Doors', 'slug' => 'interior-doors', 'description' => 'Panel doors, flush doors, barn doors', 'icon' => 'DoorClosed'],
-                    ['id' => 'sub-exterior-doors', 'name' => 'Exterior Doors', 'slug' => 'exterior-doors', 'description' => 'Entry doors, security doors, storm doors', 'icon' => 'DoorOpen'],
-                    ['id' => 'sub-sliding-doors', 'name' => 'Sliding Doors', 'slug' => 'sliding-doors', 'description' => 'Patio doors, pocket doors, bypass doors', 'icon' => 'PanelLeftClose'],
-                    ['id' => 'sub-standard-windows', 'name' => 'Standard Windows', 'slug' => 'standard-windows', 'description' => 'Single/double hung, casement, awning', 'icon' => 'SquareStack'],
-                    ['id' => 'sub-specialty-windows', 'name' => 'Specialty Windows', 'slug' => 'specialty-windows', 'description' => 'Bay windows, skylights, picture windows', 'icon' => 'Hexagon'],
-                    ['id' => 'sub-french', 'name' => 'French Doors & Windows', 'slug' => 'french-doors-windows', 'description' => 'Traditional French doors and windows', 'icon' => 'LayoutGrid'],
-                ],
-            ],
         ];
 
         foreach ($modes as $modeData) {

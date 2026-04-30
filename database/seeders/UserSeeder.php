@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'company_name' => 'Demo Furniture Co.',
             'slug' => 'demo',
             'site_published_at' => Carbon::now(),
-            'language' => 'en',
+            'language' => 'ru',
             'currency' => 'AMD',
             'email_verified_at' => Carbon::now(),
         ]);

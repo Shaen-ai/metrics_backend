@@ -34,10 +34,16 @@ class AdminPublicResource extends JsonResource
             'publicSiteLayout' => PlanEntitlements::allowsPublishedLayouts($this->resource)
                 ? ($this->public_site_layout ?? config('public_site.default_layout'))
                 : config('public_site.default_layout'),
-            'publicSiteTexts' => $this->public_site_texts ?? [],
+            'publicSiteTexts' => PlanEntitlements::allowsCustomTheme($this->resource)
+                ? ($this->public_site_texts ?? [])
+                : [],
             'publicSiteTheme' => PlanEntitlements::allowsCustomTheme($this->resource)
                 ? ($this->public_site_theme ?? [])
                 : [],
+            'publicCatalogLayouts' => (is_array($this->public_catalog_layouts) && count($this->public_catalog_layouts) > 0)
+                ? $this->public_catalog_layouts
+                : config('public_site.catalog_layouts'),
+            'publicCatalogDefaultLayout' => $this->public_catalog_default_layout ?? config('public_site.default_catalog_layout'),
             'customDesignKey' => PlanEntitlements::allowsBespokeDesign($this->resource)
                 ? $this->custom_design_key
                 : null,

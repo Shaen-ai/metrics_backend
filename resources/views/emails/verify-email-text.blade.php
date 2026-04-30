@@ -5,6 +5,3 @@ Thanks for signing up with {{ config('mail.from.name') }}. Open this link to ver
 {{ $verificationUrl }}
 
 If you did not create an account, you can ignore this message.
-
-—
-{{ config('mail.from.name') }}

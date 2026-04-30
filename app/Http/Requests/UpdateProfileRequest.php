@@ -19,6 +19,17 @@ class UpdateProfileRequest extends FormRequest
                 'public_site_texts' => array_intersect_key($texts, $allowedKeys),
             ]);
         }
+
+        $catalogLayouts = $this->input('public_catalog_layouts');
+        if (is_array($catalogLayouts)) {
+            $allowedLayouts = array_flip(config('public_site.catalog_layouts'));
+            $this->merge([
+                'public_catalog_layouts' => array_values(array_unique(array_filter(
+                    $catalogLayouts,
+                    fn ($layout) => is_string($layout) && isset($allowedLayouts[$layout])
+                ))),
+            ]);
+        }
     }
 
     public function authorize(): bool
@@ -54,6 +65,9 @@ class UpdateProfileRequest extends FormRequest
             'public_site_theme.accentColor' => ['sometimes', 'nullable', 'string', 'max:32'],
             'public_site_theme.backgroundColor' => ['sometimes', 'nullable', 'string', 'max:32'],
             'public_site_theme.textColor' => ['sometimes', 'nullable', 'string', 'max:32'],
+            'public_catalog_layouts' => ['sometimes', 'array', 'min:1'],
+            'public_catalog_layouts.*' => ['string', Rule::in(config('public_site.catalog_layouts'))],
+            'public_catalog_default_layout' => ['sometimes', 'string', Rule::in(config('public_site.catalog_layouts'))],
             'custom_design_key' => ['sometimes', 'nullable', 'string', 'max:120'],
         ];
     }
@@ -78,6 +92,19 @@ class UpdateProfileRequest extends FormRequest
                 $validator->errors()->add('public_site_theme', 'Custom published site themes are available on Business Pro and Enterprise plans.');
             }
 
+            if ($this->hasNonEmptyPublicSiteTexts() && ! PlanEntitlements::allowsCustomTheme($user)) {
+                $validator->errors()->add('public_site_texts', 'Published site copy is available on Business Pro and Enterprise plans.');
+            }
+
+            if ($this->filled('public_catalog_default_layout')) {
+                $enabledLayouts = $this->input('public_catalog_layouts');
+                if (is_array($enabledLayouts)
+                    && ! in_array($this->input('public_catalog_default_layout'), $enabledLayouts, true)
+                ) {
+                    $validator->errors()->add('public_catalog_default_layout', 'The default catalog layout must be one of the visible layouts.');
+                }
+            }
+
             if ($this->filled('custom_design_key') && ! PlanEntitlements::allowsBespokeDesign($user)) {
                 $validator->errors()->add('custom_design_key', 'Bespoke designs are available on Enterprise plans.');
             }
@@ -92,5 +119,21 @@ class UpdateProfileRequest extends FormRequest
                 $validator->errors()->add('slug', 'This subdomain is reserved.');
             }
         });
+    }
+
+    private function hasNonEmptyPublicSiteTexts(): bool
+    {
+        $texts = $this->input('public_site_texts');
+        if (! is_array($texts)) {
+            return false;
+        }
+
+        foreach ($texts as $text) {
+            if (is_string($text) && trim($text) !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

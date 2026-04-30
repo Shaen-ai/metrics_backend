@@ -24,7 +24,7 @@ class UpdateMaterialRequest extends FormRequest
     {
         $typeSlugs = [
             'laminate', 'mdf', 'wood', 'worktop', 'slide', 'hinge', 'handle',
-            'metal', 'fabric', 'glass', 'plastic', 'leather', 'stone',
+            'metal', 'fabric', 'boucle', 'glass', 'plastic', 'leather', 'stone',
         ];
 
         return [

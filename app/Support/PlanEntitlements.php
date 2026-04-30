@@ -93,6 +93,11 @@ class PlanEntitlements
         return (int) ($row[$key] ?? 0);
     }
 
+    public static function hasImage3dPlan(User $user): bool
+    {
+        return self::hasActiveSubscription($user) && self::image3dMonthlyCap($user) > 0;
+    }
+
     public static function aiChatMonthlyCap(User $user): ?int
     {
         $row = self::basePlanRow($user);

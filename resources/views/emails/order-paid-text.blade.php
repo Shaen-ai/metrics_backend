@@ -14,6 +14,3 @@ Order items:
 View orders: {{ rtrim(config('app.frontend_admin_url'), '/') }}/admin/orders
 
 Please process this order promptly.
-
-—
-{{ config('mail.from.name') }}

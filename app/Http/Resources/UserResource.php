@@ -30,6 +30,10 @@ class UserResource extends JsonResource
             'publicSiteLayout' => $this->public_site_layout ?? config('public_site.default_layout'),
             'publicSiteTexts' => $this->public_site_texts ?? [],
             'publicSiteTheme' => $this->public_site_theme ?? [],
+            'publicCatalogLayouts' => (is_array($this->public_catalog_layouts) && count($this->public_catalog_layouts) > 0)
+                ? $this->public_catalog_layouts
+                : config('public_site.catalog_layouts'),
+            'publicCatalogDefaultLayout' => $this->public_catalog_default_layout ?? config('public_site.default_catalog_layout'),
             'customDesignKey' => $this->custom_design_key,
             'createdAt' => $this->created_at?->toISOString(),
             'planTier' => PlanEntitlements::normalizePlanTier($this->plan_tier ?? 'free'),

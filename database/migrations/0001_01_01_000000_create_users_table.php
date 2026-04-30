@@ -18,7 +18,7 @@ return new class extends Migration
             $table->char('selected_mode_id', 36)->nullable();
             $table->char('selected_sub_mode_id', 36)->nullable();
             $table->string('logo')->nullable();
-            $table->string('language', 2)->default('en');
+            $table->string('language', 2)->default('ru');
             $table->string('currency', 10)->default('AMD');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

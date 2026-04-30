@@ -18,6 +18,7 @@ class SignupRequest extends FormRequest
             'password' => ['required', 'string', 'min:6'],
             'name' => ['required', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
+            'language' => ['sometimes', 'in:en,ru'],
         ];
     }
 }

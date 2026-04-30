@@ -40,7 +40,7 @@ class AuthController extends Controller
                     'name' => $request->name,
                     'company_name' => $request->company_name,
                     'slug' => $this->uniqueSlugForCompany($request->company_name),
-                    'language' => 'en',
+                    'language' => $request->input('language', 'ru'),
                     'currency' => 'AMD',
                     'plan_tier' => 'free',
                     'trial_ends_at' => null,
