@@ -8,11 +8,14 @@ use App\Http\Resources\CatalogItemResource;
 use App\Http\Resources\MaterialResource;
 use App\Http\Resources\ModuleResource;
 use App\Http\Resources\OrderResource;
+use App\Mail\OrderPlacedCustomerMailable;
+use App\Mail\OrderPlacedMailable;
 use App\Models\Order;
 use App\Models\User;
-use App\Notifications\OrderPlacedNotification;
 use App\Support\PlanEntitlements;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PublicController extends Controller
@@ -202,12 +205,62 @@ class PublicController extends Controller
 
         $order->load(['items.materials']);
 
-        if (blank($admin->paypal_email)) {
-            $admin->notify(new OrderPlacedNotification($order));
-        }
+        $this->sendOrderPlacedMails($order, $admin);
 
         return response()->json([
             'data' => new OrderResource($order),
         ], 201);
+    }
+
+    /**
+     * Send new-order email to the merchant and a confirmation to the customer.
+     * Uses {@see Mail} directly so recipients are always set (notification + {@see Mailable} has no implicit To).
+     */
+    private function sendOrderPlacedMails(Order $order, User $admin): void
+    {
+        $order->loadMissing('items');
+
+        $adminEmail = $this->normalizedEmail($admin->email);
+        if ($adminEmail !== null) {
+            try {
+                Mail::to($adminEmail)->send(new OrderPlacedMailable($order));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send new-order email to admin', [
+                    'order_id' => $order->id,
+                    'admin_id' => $admin->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } else {
+            Log::warning('Order placed but admin account has no valid email; merchant notification skipped', [
+                'order_id' => $order->id,
+                'admin_id' => $admin->id,
+            ]);
+        }
+
+        $customerEmail = $this->normalizedEmail($order->customer_email);
+        if ($customerEmail !== null) {
+            try {
+                Mail::to($customerEmail)->send(new OrderPlacedCustomerMailable($order, $admin));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send order confirmation to customer', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    private function normalizedEmail(?string $email): ?string
+    {
+        if (! is_string($email)) {
+            return null;
+        }
+        $trimmed = trim($email);
+        if ($trimmed === '' || ! filter_var($trimmed, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        return $trimmed;
     }
 }

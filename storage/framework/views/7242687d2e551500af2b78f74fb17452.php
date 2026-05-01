@@ -1,2 +1,4 @@
-<p style="margin:24px 0 0;font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;"><?php echo e(config('mail.from.name')); ?></p>
+<p style="margin:28px 0 0;padding:12px 14px;border-radius:12px;background:#f9fafb;font-size:12px;line-height:1.5;color:#9ca3af;">
+This automated email was sent because of recent account activity.
+</p>
 <?php /**PATH /Users/shahen1/apps/mebel/backend/resources/views/emails/partials/branded-footer.blade.php ENDPATH**/ ?>

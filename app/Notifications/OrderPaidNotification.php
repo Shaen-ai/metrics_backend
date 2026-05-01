@@ -18,18 +18,46 @@ class OrderPaidNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $this->adminMailAddress($notifiable) !== null ? ['mail'] : [];
     }
 
     public function toMail(object $notifiable): OrderPaidMailable
     {
+        $to = $this->adminMailAddress($notifiable);
+        if ($to === null) {
+            throw new \LogicException('OrderPaidNotification: mail channel requires a valid admin email.');
+        }
+
         Log::info('Sending OrderPaidNotification email', [
-            'to' => $notifiable->email,
+            'to' => $to,
             'order_id' => $this->order->id,
             'customer' => $this->order->customer_name,
             'total' => $this->order->total_price,
         ]);
 
-        return new OrderPaidMailable($this->order);
+        return (new OrderPaidMailable($this->order))->to($to);
+    }
+
+    private function adminMailAddress(object $notifiable): ?string
+    {
+        $route = $notifiable->routeNotificationFor('mail', $this);
+        if (! is_string($route)) {
+            Log::warning('OrderPaidNotification skipped: mail route not a string', [
+                'admin_id' => $notifiable->getKey() ?? null,
+            ]);
+
+            return null;
+        }
+
+        $email = trim($route);
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Log::warning('OrderPaidNotification skipped: admin has no valid email', [
+                'admin_id' => $notifiable->getKey() ?? null,
+            ]);
+
+            return null;
+        }
+
+        return $email;
     }
 }

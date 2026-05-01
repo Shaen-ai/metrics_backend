@@ -32,7 +32,7 @@ class OrderPlacedMailable extends Mailable
         $idShort = substr($this->order->id, 0, 8);
 
         return new Envelope(
-            subject: 'New order #'.$idShort.' - payment due on shipment - '.config('mail.from.name'),
+            subject: 'New order #'.$idShort.' — '.config('mail.from.name'),
             replyTo: $replyTo,
         );
     }

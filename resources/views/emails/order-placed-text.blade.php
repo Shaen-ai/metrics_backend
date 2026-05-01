@@ -3,8 +3,13 @@ New order received
 Customer: {{ $order->customer_name }}
 Email: {{ $order->customer_email }}
 Phone: {{ $order->customer_phone ?: 'N/A' }}
+@if($order->customer_address)
+Delivery address:
+{{ $order->customer_address }}
+
+@endif
 Total: {{ number_format($order->total_price, 2) }}
-Payment: Pending - collect payment when the order ships.
+Payment: Arrange payment and delivery with the customer as you usually do.
 
 Order items:
 @foreach($order->items as $item)

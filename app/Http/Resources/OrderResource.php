@@ -15,6 +15,7 @@ class OrderResource extends JsonResource
             'customerName' => $this->customer_name,
             'customerEmail' => $this->customer_email,
             'customerPhone' => $this->customer_phone,
+            'customerAddress' => $this->customer_address,
             'type' => $this->type,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'totalPrice' => (float) $this->total_price,

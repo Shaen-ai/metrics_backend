@@ -16,7 +16,8 @@ class PublicOrderRequest extends FormRequest
         return [
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email'],
-            'customer_phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'customer_phone' => ['required', 'string', 'max:30'],
+            'customer_address' => ['required', 'string', 'max:2000'],
             'type' => ['required', 'in:catalog,module,custom'],
             'total_price' => ['required', 'numeric', 'min:0'],
             'notes' => ['sometimes', 'nullable', 'string'],
