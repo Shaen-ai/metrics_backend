@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,21 +23,15 @@ class UploadController extends Controller
             'image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:10240'],
         ]);
 
-        $path = $request->file('image')->store(
-            'files/' . $request->user()->id . '/images',
-            'public'
-        );
-
-        $url = url('/storage/' . $path);
-
-        return response()->json(['url' => $url]);
+        return response()->json([
+            'url' => $this->storeImageFile($request->file('image'), 'images', (string) $request->user()->id),
+        ]);
     }
 
     /**
      * Stores a laminate/wood/worktop sheet texture image.
-     * Lives in its own folder (files/{userId}/materials) — sibling of the
-     * 3D-model folder (files/{userId}/models) so production and support can
-     * find all per-user uploads grouped by purpose.
+     * Lives in its own folder so production and support can find all per-user
+     * uploads grouped by purpose.
      */
     public function storeMaterialImage(Request $request): JsonResponse
     {
@@ -54,13 +49,9 @@ class UploadController extends Controller
         $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
         $filename = uniqid('mat_', true) . '.' . $ext;
 
-        $path = $file->storeAs(
-            'files/' . $request->user()->id . '/materials',
-            $filename,
-            'public'
-        );
-
-        return response()->json(['url' => url('/storage/' . $path)]);
+        return response()->json([
+            'url' => $this->storeImageFile($file, 'materials', (string) $request->user()->id, $filename),
+        ]);
     }
 
     public function storeModel(Request $request): JsonResponse
@@ -86,18 +77,14 @@ class UploadController extends Controller
             );
         }
 
-        $filename = $request->input('filename', $file->getClientOriginalName());
+        $filename = $this->safeModelFilename($request->input('filename', $file->getClientOriginalName()));
         if (!str_ends_with(strtolower($filename), '.glb') && !str_ends_with(strtolower($filename), '.gltf')) {
             $filename .= '.' . $ext;
         }
 
-        $dir = 'files/' . $request->user()->id . '/models';
-
-        $path = $file->storeAs($dir, $filename, 'public');
-
-        $url = url('/storage/' . $path);
-
-        return response()->json(['url' => $url]);
+        return response()->json([
+            'url' => $this->storeModelFile($file, $filename, (string) $request->user()->id),
+        ]);
     }
 
     public function downloadRemoteModel(Request $request): JsonResponse
@@ -108,7 +95,7 @@ class UploadController extends Controller
         ]);
 
         $remoteUrl = $request->input('url');
-        $filename = $request->input('filename');
+        $filename = $this->safeModelFilename($request->input('filename'));
 
         if (!str_ends_with(strtolower($filename), '.glb') && !str_ends_with(strtolower($filename), '.gltf')) {
             $filename .= '.glb';
@@ -124,12 +111,9 @@ class UploadController extends Controller
                 );
             }
 
-            $dir = 'files/' . $request->user()->id . '/models';
-            Storage::disk('public')->put($dir . '/' . $filename, $response->body());
-
-            $url = url('/storage/' . $dir . '/' . $filename);
-
-            return response()->json(['url' => $url]);
+            return response()->json([
+                'url' => $this->storeModelContents($response->body(), $filename, (string) $request->user()->id),
+            ]);
         } catch (\Exception $e) {
             return response()->json(
                 ['message' => 'Failed to download remote model: ' . $e->getMessage()],
@@ -182,6 +166,83 @@ class UploadController extends Controller
         }
 
         return null;
+    }
+
+    private function safeModelFilename(string $filename): string
+    {
+        $basename = basename(str_replace('\\', '/', trim($filename)));
+
+        return $basename !== '' ? $basename : uniqid('model_', true).'.glb';
+    }
+
+    private function storeImageFile(
+        UploadedFile $file,
+        string $purpose,
+        string $userId,
+        ?string $filename = null
+    ): string {
+        $filename ??= $file->hashName();
+        $externalDir = config('services.image_upload_path');
+        if (is_string($externalDir) && trim($externalDir) !== '') {
+            $dir = rtrim($externalDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $userId . DIRECTORY_SEPARATOR . $purpose;
+            File::ensureDirectoryExists($dir, 0775, true);
+            $file->move($dir, $filename);
+
+            return $this->externalImageUrl($userId, $purpose, $filename);
+        }
+
+        $dir = 'files/' . $userId . '/' . $purpose;
+        $path = $file->storeAs($dir, $filename, 'public');
+
+        return url('/storage/' . $path);
+    }
+
+    private function storeModelFile(UploadedFile $file, string $filename, string $userId): string
+    {
+        $externalDir = config('services.model_upload_path');
+        if (is_string($externalDir) && trim($externalDir) !== '') {
+            $dir = rtrim($externalDir, DIRECTORY_SEPARATOR);
+            File::ensureDirectoryExists($dir, 0775, true);
+            $file->move($dir, $filename);
+
+            return $this->externalModelUrl($filename);
+        }
+
+        $dir = 'files/' . $userId . '/models';
+        $path = $file->storeAs($dir, $filename, 'public');
+
+        return url('/storage/' . $path);
+    }
+
+    private function storeModelContents(string $contents, string $filename, string $userId): string
+    {
+        $externalDir = config('services.model_upload_path');
+        if (is_string($externalDir) && trim($externalDir) !== '') {
+            $dir = rtrim($externalDir, DIRECTORY_SEPARATOR);
+            File::ensureDirectoryExists($dir, 0775, true);
+            File::put($dir . DIRECTORY_SEPARATOR . $filename, $contents);
+
+            return $this->externalModelUrl($filename);
+        }
+
+        $dir = 'files/' . $userId . '/models';
+        Storage::disk('public')->put($dir . '/' . $filename, $contents);
+
+        return url('/storage/' . $dir . '/' . $filename);
+    }
+
+    private function externalModelUrl(string $filename): string
+    {
+        $urlPath = '/' . trim((string) config('services.model_upload_url_path', '/files/models'), '/');
+
+        return url($urlPath . '/' . rawurlencode($filename));
+    }
+
+    private function externalImageUrl(string $userId, string $purpose, string $filename): string
+    {
+        $urlPath = '/' . trim((string) config('services.image_upload_url_path', '/files/images'), '/');
+
+        return url($urlPath . '/' . rawurlencode($userId) . '/' . rawurlencode($purpose) . '/' . rawurlencode($filename));
     }
 
     private function phpUploadErrorMessage(int $code): string

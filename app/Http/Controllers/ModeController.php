@@ -10,7 +10,9 @@ class ModeController extends Controller
 {
     public function index(): JsonResponse
     {
-        $modes = Mode::with('subModes')->where('is_active', true)->get();
+        $modes = Mode::with(['subModes' => fn ($query) => $query->where('is_active', true)])
+            ->where('is_active', true)
+            ->get();
 
         return response()->json([
             'data' => ModeResource::collection($modes),

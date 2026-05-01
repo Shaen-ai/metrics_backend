@@ -23,9 +23,7 @@ return [
         'list',
         'masonry',
         'magazine',
-        'showcase',
         'reels',
-        'commerce',
         'gallery',
     ],
 
@@ -40,6 +38,5 @@ return [
         'plannersSubtitle',
         'materialsTitle',
         'materialsSubtitle',
-        'footerTagline',
     ],
 ];

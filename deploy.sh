@@ -7,6 +7,7 @@ REMOTE_DIR="${REMOTE_DIR:-/var/www/tunzone/backend}"
 REMOTE_OWNER="${REMOTE_OWNER:-ubuntu:ubuntu}"
 PERSISTENT_FILES_DIR="${PERSISTENT_FILES_DIR:-/var/www/tunzone/files}"
 PERSISTENT_MODEL_DIR="${PERSISTENT_MODEL_DIR:-$PERSISTENT_FILES_DIR/models}"
+PERSISTENT_IMAGE_DIR="${PERSISTENT_IMAGE_DIR:-$PERSISTENT_FILES_DIR/images}"
 CLEAN_LEGACY_STORAGE_MODELS="${CLEAN_LEGACY_STORAGE_MODELS:-1}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.4-fpm}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"
@@ -40,7 +41,7 @@ rsync -avz --delete \
   "$APP_DIR/" "$SERVER:$REMOTE_DIR/"
 
 $SSH "$SERVER" "set -e \
-  && sudo mkdir -p '$PERSISTENT_MODEL_DIR' \
+  && sudo mkdir -p '$PERSISTENT_MODEL_DIR' '$PERSISTENT_IMAGE_DIR' \
   && sudo mkdir -p '$REMOTE_DIR/storage/app/public/files' \
   && sudo mkdir -p '$REMOTE_DIR/storage/framework/cache/data' '$REMOTE_DIR/storage/framework/sessions' '$REMOTE_DIR/storage/framework/views' '$REMOTE_DIR/storage/logs' '$REMOTE_DIR/bootstrap/cache' \
   && if [ '$CLEAN_LEGACY_STORAGE_MODELS' = '1' ]; then sudo find '$REMOTE_DIR/storage/app/public/files' -mindepth 2 -maxdepth 2 -type d -name models -exec rm -rf {} +; fi \

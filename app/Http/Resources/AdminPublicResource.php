@@ -31,15 +31,11 @@ class AdminPublicResource extends JsonResource
                 ? $this->planner_material_ids
                 : null,
             'useCustomPlannerCatalog' => (bool) $this->use_custom_planner_catalog,
-            'publicSiteLayout' => PlanEntitlements::allowsPublishedLayouts($this->resource)
-                ? ($this->public_site_layout ?? config('public_site.default_layout'))
-                : config('public_site.default_layout'),
-            'publicSiteTexts' => PlanEntitlements::allowsCustomTheme($this->resource)
-                ? ($this->public_site_texts ?? [])
-                : [],
-            'publicSiteTheme' => PlanEntitlements::allowsCustomTheme($this->resource)
-                ? ($this->public_site_theme ?? [])
-                : [],
+            // Always expose stored values on the public storefront. Plan checks gate *editing* in
+            // UpdateProfileRequest; masking here made the live site ignore “Published site design”.
+            'publicSiteLayout' => $this->public_site_layout ?? config('public_site.default_layout'),
+            'publicSiteTexts' => is_array($this->public_site_texts) ? $this->public_site_texts : [],
+            'publicSiteTheme' => is_array($this->public_site_theme) ? $this->public_site_theme : [],
             'publicCatalogLayouts' => (is_array($this->public_catalog_layouts) && count($this->public_catalog_layouts) > 0)
                 ? $this->public_catalog_layouts
                 : config('public_site.catalog_layouts'),

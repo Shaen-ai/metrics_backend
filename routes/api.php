@@ -10,6 +10,7 @@ use App\Http\Controllers\ModeController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Billing\StripeCheckoutController;
+use App\Http\Controllers\Billing\StripePortalController;
 use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\PlannerController;
@@ -48,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::put('/auth/me', [AuthController::class, 'updateProfile']);
     Route::get('/auth/subdomain-availability', [AuthController::class, 'subdomainAvailability']);
+    Route::post('/billing/portal', [StripePortalController::class, 'create']);
     /** Needed for onboarding (choose mode/sub-modes before other subscribed features). */
     Route::get('/modes', [ModeController::class, 'index']);
 });

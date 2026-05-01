@@ -19,11 +19,12 @@ class ModeSeeder extends Seeder
                 'icon' => 'Armchair',
                 'subModes' => [
                     ['id' => 'sub-kitchen', 'name' => 'Kitchen', 'slug' => 'kitchen', 'description' => 'Cabinets, islands, pantry units, kitchen tables', 'icon' => 'ChefHat'],
+                    ['id' => 'sub-wardrobe', 'name' => 'Wardrobe', 'slug' => 'wardrobe', 'description' => 'Built-in wardrobes, closet systems, shelving', 'icon' => 'DoorClosed'],
                     ['id' => 'sub-living-room', 'name' => 'Living Room', 'slug' => 'living-room', 'description' => 'TV units, coffee tables, shelving, display cabinets', 'icon' => 'Tv'],
                     ['id' => 'sub-bedroom', 'name' => 'Bedroom', 'slug' => 'bedroom', 'description' => 'Beds, wardrobes, nightstands, dressers, vanities', 'icon' => 'Bed'],
                     ['id' => 'sub-dining-room', 'name' => 'Dining Room', 'slug' => 'dining-room', 'description' => 'Dining tables, chairs, buffets, sideboards', 'icon' => 'UtensilsCrossed'],
                     ['id' => 'sub-office', 'name' => 'Office', 'slug' => 'office', 'description' => 'Desks, office chairs, bookcases, filing cabinets', 'icon' => 'Briefcase'],
-                    ['id' => 'sub-outdoor', 'name' => 'Outdoor', 'slug' => 'outdoor', 'description' => 'Garden furniture, patio sets, benches', 'icon' => 'TreePine'],
+                    ['id' => 'sub-outdoor', 'name' => 'Outdoor', 'slug' => 'outdoor', 'description' => 'Garden furniture, patio sets, benches', 'icon' => 'TreePine', 'is_active' => false],
                 ],
             ],
             [

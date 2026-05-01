@@ -10,6 +10,7 @@ use App\Http\Resources\ModuleResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\OrderPlacedNotification;
 use App\Support\PlanEntitlements;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -200,6 +201,10 @@ class PublicController extends Controller
         }
 
         $order->load(['items.materials']);
+
+        if (blank($admin->paypal_email)) {
+            $admin->notify(new OrderPlacedNotification($order));
+        }
 
         return response()->json([
             'data' => new OrderResource($order),

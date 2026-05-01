@@ -13,4 +13,10 @@ return [
 
     /** Public URL path that Nginx aliases to model_upload_path. */
     'model_upload_url_path' => env('MODEL_UPLOAD_URL_PATH', '/files/models'),
+
+    /** Absolute server directory for uploaded images. Empty = Laravel public disk. */
+    'image_upload_path' => env('IMAGE_UPLOAD_PATH'),
+
+    /** Public URL path that Nginx aliases to image_upload_path. */
+    'image_upload_url_path' => env('IMAGE_UPLOAD_URL_PATH', '/files/images'),
 ];
