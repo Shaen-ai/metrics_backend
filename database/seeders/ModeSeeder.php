@@ -24,7 +24,7 @@ class ModeSeeder extends Seeder
                     ['id' => 'sub-bedroom', 'name' => 'Bedroom', 'slug' => 'bedroom', 'description' => 'Beds, wardrobes, nightstands, dressers, vanities', 'icon' => 'Bed'],
                     ['id' => 'sub-dining-room', 'name' => 'Dining Room', 'slug' => 'dining-room', 'description' => 'Dining tables, chairs, buffets, sideboards', 'icon' => 'UtensilsCrossed'],
                     ['id' => 'sub-office', 'name' => 'Office', 'slug' => 'office', 'description' => 'Desks, office chairs, bookcases, filing cabinets', 'icon' => 'Briefcase'],
-                    ['id' => 'sub-outdoor', 'name' => 'Outdoor', 'slug' => 'outdoor', 'description' => 'Garden furniture, patio sets, benches', 'icon' => 'TreePine', 'is_active' => false],
+                    ['id' => 'sub-outdoor', 'name' => 'Outdoor', 'slug' => 'outdoor', 'description' => 'Garden furniture, patio sets, benches', 'icon' => 'TreePine', 'is_active' => true],
                 ],
             ],
             [

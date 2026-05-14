@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class ImageProxyController extends Controller
 {
@@ -20,6 +21,8 @@ class ImageProxyController extends Controller
         'kastamonu.com.tr',
         'images.unsplash.com',
         'marco.am',
+        'buldi.am',
+        'decora-group.ams3.cdn.digitaloceanspaces.com',
     ];
 
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'];
@@ -39,14 +42,20 @@ class ImageProxyController extends Controller
             return response()->json(['message' => 'Host not allowed.'], 403);
         }
 
-        $cacheKey = 'img_proxy:' . md5($url);
+        $cacheKey = 'img_proxy:'.md5($url);
 
         $cached = Cache::get($cacheKey);
-        if ($cached) {
-            return response($cached['body'])
-                ->header('Content-Type', $cached['content_type'])
-                ->header('Cache-Control', 'public, max-age=86400')
-                ->header('Access-Control-Allow-Origin', '*');
+        if (is_array($cached)) {
+            $body = isset($cached['body_base64'])
+                ? base64_decode((string) $cached['body_base64'], true)
+                : ($cached['body'] ?? false);
+
+            if (is_string($body)) {
+                return response($body)
+                    ->header('Content-Type', $cached['content_type'])
+                    ->header('Cache-Control', 'public, max-age=86400')
+                    ->header('Access-Control-Allow-Origin', '*');
+            }
         }
 
         try {
@@ -56,7 +65,7 @@ class ImageProxyController extends Controller
 
             if (! $response->successful()) {
                 return response()->json(
-                    ['message' => 'Upstream returned ' . $response->status()],
+                    ['message' => 'Upstream returned '.$response->status()],
                     502,
                 );
             }
@@ -70,7 +79,7 @@ class ImageProxyController extends Controller
             $body = $response->body();
 
             Cache::put($cacheKey, [
-                'body' => $body,
+                'body_base64' => base64_encode($body),
                 'content_type' => $contentType,
             ], self::CACHE_TTL);
 
@@ -78,9 +87,11 @@ class ImageProxyController extends Controller
                 ->header('Content-Type', $contentType)
                 ->header('Cache-Control', 'public, max-age=86400')
                 ->header('Access-Control-Allow-Origin', '*');
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
+            report($e);
+
             return response()->json(
-                ['message' => 'Failed to fetch image: ' . $e->getMessage()],
+                ['message' => 'Failed to fetch image.'],
                 502,
             );
         }
@@ -89,7 +100,7 @@ class ImageProxyController extends Controller
     private function isAllowedHost(string $host): bool
     {
         foreach (self::ALLOWED_HOSTS as $allowed) {
-            if ($host === $allowed || str_ends_with($host, '.' . $allowed)) {
+            if ($host === $allowed || str_ends_with($host, '.'.$allowed)) {
                 return true;
             }
         }

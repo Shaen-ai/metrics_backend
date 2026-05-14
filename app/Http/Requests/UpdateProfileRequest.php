@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Support\PlanEntitlements;
 use App\Support\StorefrontSubdomain;
 use Illuminate\Foundation\Http\FormRequest;
@@ -69,6 +70,8 @@ class UpdateProfileRequest extends FormRequest
             'public_catalog_layouts.*' => ['string', Rule::in(config('public_site.catalog_layouts'))],
             'public_catalog_default_layout' => ['sometimes', 'string', Rule::in(config('public_site.catalog_layouts'))],
             'custom_design_key' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'interior_design_catalog_coverage_mode' => ['sometimes', Rule::in(['percent', 'count'])],
+            'interior_design_catalog_coverage_value' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 
@@ -117,6 +120,27 @@ class UpdateProfileRequest extends FormRequest
             }
             if (StorefrontSubdomain::isReserved($slug)) {
                 $validator->errors()->add('slug', 'This subdomain is reserved.');
+            }
+        });
+
+        $validator->after(function (Validator $validator): void {
+            $modeRaw = $this->input('interior_design_catalog_coverage_mode');
+            $valRaw = $this->input('interior_design_catalog_coverage_value');
+            if ($valRaw === null && $modeRaw === null) {
+                return;
+            }
+            /** @var User|null $profileUser */
+            $profileUser = $this->user();
+            $storedMode = $profileUser?->interior_design_catalog_coverage_mode ?? 'percent';
+            $mode = is_string($modeRaw) && in_array($modeRaw, ['percent', 'count'], true)
+                ? $modeRaw
+                : (is_string($storedMode) && in_array($storedMode, ['percent', 'count'], true) ? $storedMode : 'percent');
+            $val = is_numeric($valRaw) ? (int) $valRaw : 0;
+            if ($mode === 'percent' && ($val < 1 || $val > 100)) {
+                $validator->errors()->add('interior_design_catalog_coverage_value', 'Percent must be between 1 and 100.');
+            }
+            if ($mode === 'count' && ($val < 1 || $val > 120)) {
+                $validator->errors()->add('interior_design_catalog_coverage_value', 'Count must be between 1 and 120.');
             }
         });
     }

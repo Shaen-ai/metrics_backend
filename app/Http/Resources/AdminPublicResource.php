@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\SubMode;
 use App\Support\PlanEntitlements;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -11,8 +12,8 @@ class AdminPublicResource extends JsonResource
     public function toArray(Request $request): array
     {
         $subModeSlugs = [];
-        if (!empty($this->selected_sub_mode_ids)) {
-            $subModeSlugs = \App\Models\SubMode::whereIn('id', $this->selected_sub_mode_ids)
+        if (! empty($this->selected_sub_mode_ids)) {
+            $subModeSlugs = SubMode::whereIn('id', $this->selected_sub_mode_ids)
                 ->pluck('slug')
                 ->values()
                 ->toArray();
@@ -43,6 +44,12 @@ class AdminPublicResource extends JsonResource
             'customDesignKey' => PlanEntitlements::allowsBespokeDesign($this->resource)
                 ? $this->custom_design_key
                 : null,
+            'interiorDesignCatalogCoverage' => [
+                'mode' => in_array(($this->interior_design_catalog_coverage_mode ?? null), ['percent', 'count'], true)
+                    ? $this->interior_design_catalog_coverage_mode
+                    : 'percent',
+                'value' => (int) ($this->interior_design_catalog_coverage_value ?? 50),
+            ],
             'entitlements' => PlanEntitlements::toPublicArray($this->resource),
         ];
     }

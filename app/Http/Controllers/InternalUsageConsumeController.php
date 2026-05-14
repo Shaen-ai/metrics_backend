@@ -21,7 +21,7 @@ class InternalUsageConsumeController extends Controller
 
         $data = $request->validate([
             'slug' => 'required|string',
-            'feature' => 'required|string|in:image3d,ai_chat',
+            'feature' => 'required|string|in:image3d,ai_chat,interior_design',
         ]);
 
         $user = User::where('slug', $data['slug'])->first();
@@ -40,6 +40,13 @@ class InternalUsageConsumeController extends Controller
             if (! PlanEntitlements::consumeImage3d($user)) {
                 return response()->json([
                     'message' => 'Image-to-3D monthly limit reached for this workspace.',
+                    'entitlements' => PlanEntitlements::toPublicArray($user->fresh()),
+                ], 429);
+            }
+        } elseif ($data['feature'] === 'interior_design') {
+            if (! PlanEntitlements::consumeInteriorDesign($user)) {
+                return response()->json([
+                    'message' => 'Interior design monthly limit reached for this workspace.',
                     'entitlements' => PlanEntitlements::toPublicArray($user->fresh()),
                 ], 429);
             }

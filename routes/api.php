@@ -1,22 +1,26 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Billing\StripeCheckoutController;
+use App\Http\Controllers\Billing\StripePortalController;
+use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\CatalogItemController;
 use App\Http\Controllers\ColorDetectorController;
+use App\Http\Controllers\ContactFormController;
+use App\Http\Controllers\ErrorReportController;
 use App\Http\Controllers\ImageProxyController;
+use App\Http\Controllers\InteriorDesignController;
+use App\Http\Controllers\InternalUsageConsumeController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialTemplateController;
 use App\Http\Controllers\ModeController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\Billing\StripeCheckoutController;
-use App\Http\Controllers\Billing\StripePortalController;
-use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\PlannerController;
-use App\Http\Controllers\InternalUsageConsumeController;
-use App\Http\Controllers\ContactFormController;
+use App\Http\Controllers\PlannerCustomDesignController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UsageConsumeController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,10 +62,10 @@ Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
     Route::post('/auth/publish-site', [AuthController::class, 'publishSite']);
     Route::post('/usage/consume', [UsageConsumeController::class, 'consume']);
 
-    Route::post('/upload-image', [\App\Http\Controllers\UploadController::class, 'store']);
-    Route::post('/upload-material-image', [\App\Http\Controllers\UploadController::class, 'storeMaterialImage']);
-    Route::post('/upload-model', [\App\Http\Controllers\UploadController::class, 'storeModel']);
-    Route::post('/download-remote-model', [\App\Http\Controllers\UploadController::class, 'downloadRemoteModel']);
+    Route::post('/upload-image', [UploadController::class, 'store']);
+    Route::post('/upload-material-image', [UploadController::class, 'storeMaterialImage']);
+    Route::post('/upload-model', [UploadController::class, 'storeModel']);
+    Route::post('/download-remote-model', [UploadController::class, 'downloadRemoteModel']);
 
     Route::apiResource('catalog-items', CatalogItemController::class);
 
@@ -78,7 +82,19 @@ Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
 
+    Route::post('/error-report', [ErrorReportController::class, 'store'])
+        ->middleware('throttle:10,1');
+
     Route::get('/planner/history', [PlannerController::class, 'history']);
+    Route::post('/planners/custom-design/save', [PlannerCustomDesignController::class, 'save']);
+    Route::get('/planners/custom-design/load', [PlannerCustomDesignController::class, 'load']);
+    Route::post('/planners/custom-design/submit', [PlannerCustomDesignController::class, 'submit']);
+
+    Route::post('/interior-design/sessions', [InteriorDesignController::class, 'createSession']);
+    Route::get('/interior-design/sessions', [InteriorDesignController::class, 'listSessions']);
+    Route::get('/interior-design/sessions/{id}', [InteriorDesignController::class, 'showSession']);
+    Route::post('/interior-design/sessions/{id}/images', [InteriorDesignController::class, 'addImages']);
+    Route::delete('/interior-design/sessions/{id}', [InteriorDesignController::class, 'deleteSession']);
 });
 
 /*
@@ -102,10 +118,17 @@ Route::prefix('public/{slug}')->group(function () {
     Route::get('/catalog', [PublicController::class, 'catalog']);
     Route::get('/materials', [PublicController::class, 'materials']);
     Route::get('/modules', [PublicController::class, 'modules']);
+    Route::post('/planner-inquiry', [PublicController::class, 'plannerInquiry'])
+        ->middleware('throttle:12,1');
+    Route::post('/planners/custom-design/submit', [PlannerCustomDesignController::class, 'submitPublic'])
+        ->middleware('throttle:12,1');
     Route::post('/orders', [PublicController::class, 'submitOrder']);
 });
 
 Route::post('/internal/usage/consume', [InternalUsageConsumeController::class, 'consume']);
+
+Route::get('/interior-design/images/{id}', [InteriorDesignController::class, 'serveImage']);
+Route::post('/public/{slug}/interior-design/upload', [InteriorDesignController::class, 'publicUpload']);
 
 Route::post('/planner/generate', [PlannerController::class, 'generate']);
 
@@ -115,4 +138,3 @@ Route::post('/paypal/ipn', [PaypalController::class, 'ipn']);
 
 Route::get('/billing/checkout', [StripeCheckoutController::class, 'redirect']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
-

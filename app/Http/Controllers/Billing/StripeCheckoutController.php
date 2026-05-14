@@ -59,8 +59,8 @@ class StripeCheckoutController extends Controller
 
         $user = $this->userFromBearer($request);
 
-        $adminBase = rtrim((string) env('FRONTEND_ADMIN_URL', ''), '/');
-        $landingBase = rtrim((string) env('FRONTEND_LANDING_URL', ''), '/');
+        $adminBase = rtrim((string) config('app.frontend_admin_url'), '/');
+        $landingBase = rtrim((string) config('app.frontend_landing_url'), '/');
 
         if ($adminBase === '') {
             return $request->wantsJson()

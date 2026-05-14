@@ -47,7 +47,7 @@ class UploadController extends Controller
 
         $file = $request->file('image');
         $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
-        $filename = uniqid('mat_', true) . '.' . $ext;
+        $filename = uniqid('mat_', true).'.'.$ext;
 
         return response()->json([
             'url' => $this->storeImageFile($file, 'materials', (string) $request->user()->id, $filename),
@@ -63,14 +63,14 @@ class UploadController extends Controller
         }
 
         $request->validate([
-            'model' => ['required', 'file', 'max:10240'],
+            'model' => ['required', 'file', 'max:51200'],
             'filename' => ['sometimes', 'string', 'max:255'],
         ]);
 
         $file = $request->file('model');
         $ext = $file->getClientOriginalExtension();
 
-        if (!in_array(strtolower($ext), ['glb', 'gltf'])) {
+        if (! in_array(strtolower($ext), ['glb', 'gltf'])) {
             return response()->json(
                 ['message' => 'Only .glb and .gltf files are accepted'],
                 422
@@ -78,8 +78,8 @@ class UploadController extends Controller
         }
 
         $filename = $this->safeModelFilename($request->input('filename', $file->getClientOriginalName()));
-        if (!str_ends_with(strtolower($filename), '.glb') && !str_ends_with(strtolower($filename), '.gltf')) {
-            $filename .= '.' . $ext;
+        if (! str_ends_with(strtolower($filename), '.glb') && ! str_ends_with(strtolower($filename), '.gltf')) {
+            $filename .= '.'.$ext;
         }
 
         return response()->json([
@@ -97,16 +97,16 @@ class UploadController extends Controller
         $remoteUrl = $request->input('url');
         $filename = $this->safeModelFilename($request->input('filename'));
 
-        if (!str_ends_with(strtolower($filename), '.glb') && !str_ends_with(strtolower($filename), '.gltf')) {
+        if (! str_ends_with(strtolower($filename), '.glb') && ! str_ends_with(strtolower($filename), '.gltf')) {
             $filename .= '.glb';
         }
 
         try {
             $response = Http::timeout(120)->withOptions(['stream' => true])->get($remoteUrl);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return response()->json(
-                    ['message' => 'Failed to download remote file: ' . $response->status()],
+                    ['message' => 'Failed to download remote file: '.$response->status()],
                     422
                 );
             }
@@ -116,7 +116,7 @@ class UploadController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(
-                ['message' => 'Failed to download remote model: ' . $e->getMessage()],
+                ['message' => 'Failed to download remote model: '.$e->getMessage()],
                 500
             );
         }
@@ -134,7 +134,7 @@ class UploadController extends Controller
                 $postMax = $this->iniBytes(ini_get('post_max_size'));
                 if ($contentLength > 0 && $postMax > 0 && $contentLength > $postMax) {
                     return response()->json([
-                        'message' => 'The request is larger than PHP post_max_size ('.ini_get('post_max_size').'). Increase post_max_size to at least 12M in php.ini and restart the PHP server.',
+                        'message' => 'The request is larger than PHP post_max_size ('.ini_get('post_max_size').'). Increase post_max_size to at least 22M in php.ini and restart the PHP server.',
                         'errors' => [
                             $field => ['Request body was rejected: increase PHP post_max_size.'],
                         ],
@@ -184,17 +184,17 @@ class UploadController extends Controller
         $filename ??= $file->hashName();
         $externalDir = config('services.image_upload_path');
         if (is_string($externalDir) && trim($externalDir) !== '') {
-            $dir = rtrim($externalDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $userId . DIRECTORY_SEPARATOR . $purpose;
+            $dir = rtrim($externalDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$userId.DIRECTORY_SEPARATOR.$purpose;
             File::ensureDirectoryExists($dir, 0775, true);
             $file->move($dir, $filename);
 
             return $this->externalImageUrl($userId, $purpose, $filename);
         }
 
-        $dir = 'files/' . $userId . '/' . $purpose;
+        $dir = 'files/'.$userId.'/'.$purpose;
         $path = $file->storeAs($dir, $filename, 'public');
 
-        return url('/storage/' . $path);
+        return url('/storage/'.$path);
     }
 
     private function storeModelFile(UploadedFile $file, string $filename, string $userId): string
@@ -208,10 +208,10 @@ class UploadController extends Controller
             return $this->externalModelUrl($filename);
         }
 
-        $dir = 'files/' . $userId . '/models';
+        $dir = 'files/'.$userId.'/models';
         $path = $file->storeAs($dir, $filename, 'public');
 
-        return url('/storage/' . $path);
+        return url('/storage/'.$path);
     }
 
     private function storeModelContents(string $contents, string $filename, string $userId): string
@@ -220,35 +220,35 @@ class UploadController extends Controller
         if (is_string($externalDir) && trim($externalDir) !== '') {
             $dir = rtrim($externalDir, DIRECTORY_SEPARATOR);
             File::ensureDirectoryExists($dir, 0775, true);
-            File::put($dir . DIRECTORY_SEPARATOR . $filename, $contents);
+            File::put($dir.DIRECTORY_SEPARATOR.$filename, $contents);
 
             return $this->externalModelUrl($filename);
         }
 
-        $dir = 'files/' . $userId . '/models';
-        Storage::disk('public')->put($dir . '/' . $filename, $contents);
+        $dir = 'files/'.$userId.'/models';
+        Storage::disk('public')->put($dir.'/'.$filename, $contents);
 
-        return url('/storage/' . $dir . '/' . $filename);
+        return url('/storage/'.$dir.'/'.$filename);
     }
 
     private function externalModelUrl(string $filename): string
     {
-        $urlPath = '/' . trim((string) config('services.model_upload_url_path', '/files/models'), '/');
+        $urlPath = '/'.trim((string) config('services.model_upload_url_path', '/files/models'), '/');
 
-        return url($urlPath . '/' . rawurlencode($filename));
+        return url($urlPath.'/'.rawurlencode($filename));
     }
 
     private function externalImageUrl(string $userId, string $purpose, string $filename): string
     {
-        $urlPath = '/' . trim((string) config('services.image_upload_url_path', '/files/images'), '/');
+        $urlPath = '/'.trim((string) config('services.image_upload_url_path', '/files/images'), '/');
 
-        return url($urlPath . '/' . rawurlencode($userId) . '/' . rawurlencode($purpose) . '/' . rawurlencode($filename));
+        return url($urlPath.'/'.rawurlencode($userId).'/'.rawurlencode($purpose).'/'.rawurlencode($filename));
     }
 
     private function phpUploadErrorMessage(int $code): string
     {
         return match ($code) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'File is larger than the server allows (PHP limit). Increase upload_max_filesize and post_max_size in php.ini (e.g. 10M and 12M) and restart PHP. Current limit: upload_max_filesize='.ini_get('upload_max_filesize').', post_max_size='.ini_get('post_max_size').'.',
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'File is larger than the server allows (PHP limit). Increase upload_max_filesize and post_max_size in php.ini (e.g. 20M and 22M) and restart PHP. Current limit: upload_max_filesize='.ini_get('upload_max_filesize').', post_max_size='.ini_get('post_max_size').'.',
             UPLOAD_ERR_PARTIAL => 'The file was only partially uploaded. Try again with a smaller file or a stable connection.',
             UPLOAD_ERR_NO_FILE => 'No file was received.',
             UPLOAD_ERR_NO_TMP_DIR => 'Server is missing a temporary folder (upload_tmp_dir).',

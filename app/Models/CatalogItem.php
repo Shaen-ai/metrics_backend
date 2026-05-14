@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CatalogItem extends Model
 {
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -24,15 +25,27 @@ class CatalogItem extends Model
         'depth',
         'dimension_unit',
         'price',
+        'unit',
         'currency',
         'delivery_days',
         'category',
         'additional_categories',
+        'planner_subcategory',
         'is_active',
         'model_url',
         'model_job_id',
         'model_status',
         'model_error',
+        'supports_outdoor_cushions',
+        'outdoor_cushion_defaults',
+        'is_fabric_customizable',
+        'fabric_parts',
+        'for_design',
+        'surface_texture_width_cm',
+        'surface_texture_height_cm',
+        'surface_item_width_cm',
+        'surface_item_height_cm',
+        'surface_layout_pattern',
     ];
 
     protected function casts(): array
@@ -44,7 +57,16 @@ class CatalogItem extends Model
             'price' => 'decimal:2',
             'delivery_days' => 'integer',
             'is_active' => 'boolean',
+            'for_design' => 'boolean',
             'additional_categories' => 'array',
+            'supports_outdoor_cushions' => 'boolean',
+            'outdoor_cushion_defaults' => 'array',
+            'is_fabric_customizable' => 'boolean',
+            'fabric_parts' => 'array',
+            'surface_texture_width_cm' => 'decimal:2',
+            'surface_texture_height_cm' => 'decimal:2',
+            'surface_item_width_cm' => 'decimal:2',
+            'surface_item_height_cm' => 'decimal:2',
         ];
     }
 

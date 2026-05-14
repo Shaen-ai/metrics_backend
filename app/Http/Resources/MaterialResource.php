@@ -42,6 +42,19 @@ class MaterialResource extends JsonResource
             'kerfMm' => $this->kerf_mm !== null
                 ? (float) $this->kerf_mm
                 : 3.0,
+            'textureWidthCm' => $this->texture_width_cm !== null
+                ? (float) $this->texture_width_cm
+                : null,
+            'textureHeightCm' => $this->texture_height_cm !== null
+                ? (float) $this->texture_height_cm
+                : null,
+            'productWidthCm' => $this->product_width_cm !== null
+                ? (float) $this->product_width_cm
+                : null,
+            'productHeightCm' => $this->product_height_cm !== null
+                ? (float) $this->product_height_cm
+                : null,
+            'floorLayoutPattern' => $this->floor_layout_pattern,
             'isActive' => $this->is_active,
         ];
     }

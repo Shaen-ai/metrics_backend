@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Material extends Model
 {
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -35,6 +36,11 @@ class Material extends Model
         'sheet_height_cm',
         'grain_direction',
         'kerf_mm',
+        'texture_width_cm',
+        'texture_height_cm',
+        'product_width_cm',
+        'product_height_cm',
+        'floor_layout_pattern',
         'is_active',
     ];
 
@@ -46,6 +52,10 @@ class Material extends Model
             'sheet_width_cm' => 'decimal:2',
             'sheet_height_cm' => 'decimal:2',
             'kerf_mm' => 'decimal:2',
+            'texture_width_cm' => 'decimal:2',
+            'texture_height_cm' => 'decimal:2',
+            'product_width_cm' => 'decimal:2',
+            'product_height_cm' => 'decimal:2',
             'is_active' => 'boolean',
             'categories' => 'array',
             'types' => 'array',

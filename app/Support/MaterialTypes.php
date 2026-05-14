@@ -11,7 +11,7 @@ class MaterialTypes
     /** Admin + API primary slugs; tail entries sort legacy DB / imports only. */
     public const ORDER = [
         'laminate', 'mdf', 'wood', 'worktop', 'slide', 'hinge', 'handle',
-        'metal', 'fabric', 'boucle', 'glass', 'plastic', 'leather', 'stone',
+        'metal', 'fabric', 'paper', 'boucle', 'glass', 'plastic', 'leather', 'stone',
     ];
 
     /**

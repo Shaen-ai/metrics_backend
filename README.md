@@ -29,7 +29,7 @@ php artisan migrate
 # Seed with demo data
 php artisan db:seed
 
-# Start development server (recommended — raises upload limits for /api/upload-image)
+# Start development server (recommended — raises PHP upload limits for admin uploads)
 composer run serve
 
 # Or, without raised limits (may 422 on larger images if php.ini is still 2M)
@@ -40,7 +40,7 @@ The API will be available at `http://localhost:8000/api`. Pass `artisan serve` f
 
 ### Image / file uploads (local PHP)
 
-Homebrew’s default `php` often ships with **2M** / **8M** `upload_max_filesize` / `post_max_size`, so `/api/upload-image` can return **422** before Laravel even validates the file.
+Homebrew’s default `php` often ships with **2M** / **8M** `upload_max_filesize` / `post_max_size`, so uploads can return **422** before Laravel validates the file.
 
 **One-time fix (Homebrew, applies to `php` CLI, `php-fpm` if you use the same build):**
 
@@ -49,9 +49,9 @@ Homebrew’s default `php` often ships with **2M** / **8M** `upload_max_filesize
 cp config/php/99-mebel-uploads.ini "$(brew --prefix)/etc/php/8.4/conf.d/99-mebel-uploads.ini"
 ```
 
-Then restart the Laravel dev process (`php artisan serve` / your queue / anything using that PHP). Re-run with `php -r "echo ini_get('upload_max_filesize'), PHP_EOL;"` — it should read **10M** (and **12M** for `post_max_size`).
+Then restart the Laravel dev process (`php artisan serve` / your queue / anything using that PHP). Re-run with `php -r "echo ini_get('upload_max_filesize'), PHP_EOL;"` — it should read **20M** (and **22M** for `post_max_size`).
 
-`composer run serve` also passes **-d** flags as a belt-and-braces override; you can use either approach or both. Laravel Sail images already use large limits; Herd/Valet may use a different `php` — use their “Open php.ini” / equivalent and set the same two directives. App file uploads are capped at **10 MB** in validation (`max:10240` KB per route).
+`composer run serve` also passes **-d** flags as a belt-and-braces override; you can use either approach or both. Laravel Sail images already use large limits; Herd/Valet may use a different `php` — use their “Open php.ini” / equivalent and set the same two directives. Validation caps images at **10 MB** (`max:10240` KB) and GLB/GLTF models at **20 MB** (`max:20480` KB).
 
 ## Demo Credentials
 

@@ -35,6 +35,12 @@ class UserResource extends JsonResource
                 : config('public_site.catalog_layouts'),
             'publicCatalogDefaultLayout' => $this->public_catalog_default_layout ?? config('public_site.default_catalog_layout'),
             'customDesignKey' => $this->custom_design_key,
+            'interiorDesignCatalogCoverage' => [
+                'mode' => in_array(($this->interior_design_catalog_coverage_mode ?? null), ['percent', 'count'], true)
+                    ? $this->interior_design_catalog_coverage_mode
+                    : 'percent',
+                'value' => (int) ($this->interior_design_catalog_coverage_value ?? 50),
+            ],
             'createdAt' => $this->created_at?->toISOString(),
             'planTier' => PlanEntitlements::normalizePlanTier($this->plan_tier ?? 'free'),
             'trialEndsAt' => $this->trial_ends_at?->toISOString(),

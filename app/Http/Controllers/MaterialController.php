@@ -37,6 +37,7 @@ class MaterialController extends Controller
         $validated['types'] = $list;
         $validated['type'] = $list[0];
         $validated['category'] = $validated['categories'][0];
+        $validated['color'] = (string) ($validated['color'] ?? '');
 
         $material = Material::create([
             'id' => Str::uuid()->toString(),
@@ -77,6 +78,9 @@ class MaterialController extends Controller
             }
             $validated['types'] = $list;
             $validated['type'] = $list[0];
+        }
+        if (array_key_exists('color', $validated)) {
+            $validated['color'] = (string) ($validated['color'] ?? '');
         }
         $material->update($validated);
 

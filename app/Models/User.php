@@ -4,18 +4,19 @@ namespace App\Models;
 
 use App\Mail\ResetPasswordMailable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -49,6 +50,8 @@ class User extends Authenticatable
         'stripe_customer_id',
         'stripe_subscription_id',
         'site_published_at',
+        'interior_design_catalog_coverage_mode',
+        'interior_design_catalog_coverage_value',
     ];
 
     protected $hidden = [

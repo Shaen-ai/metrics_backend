@@ -127,6 +127,50 @@ class PlanEntitlements
             && (bool) (self::basePlanRow($user)['bespoke_design'] ?? false);
     }
 
+    public static function interiorDesignMonthlyCap(User $user): ?int
+    {
+        $row = self::basePlanRow($user);
+        if (! array_key_exists('interior_design_monthly', $row)) {
+            return 0;
+        }
+        $v = $row['interior_design_monthly'];
+
+        return $v === null ? null : (int) $v;
+    }
+
+    public static function interiorDesignRemaining(User $user): ?int
+    {
+        self::normalizeUsageMonth($user);
+        $user->refresh();
+        $cap = self::interiorDesignMonthlyCap($user);
+        if ($cap === null) {
+            return null;
+        }
+
+        return max(0, $cap - (int) $user->interior_design_generations_this_month);
+    }
+
+    public static function consumeInteriorDesign(User $user): bool
+    {
+        if (! self::hasActiveSubscription($user)) {
+            return false;
+        }
+        self::normalizeUsageMonth($user);
+        $user->refresh();
+        $cap = self::interiorDesignMonthlyCap($user);
+        if ($cap === null) {
+            $user->increment('interior_design_generations_this_month');
+
+            return true;
+        }
+        if ((int) $user->interior_design_generations_this_month >= $cap) {
+            return false;
+        }
+        $user->increment('interior_design_generations_this_month');
+
+        return true;
+    }
+
     public static function normalizeUsageMonth(User $user): void
     {
         $start = Carbon::now()->startOfMonth()->toDateString();
@@ -138,6 +182,7 @@ class PlanEntitlements
                 'usage_month_start' => $start,
                 'image3d_generations_this_month' => 0,
                 'ai_chat_messages_this_month' => 0,
+                'interior_design_generations_this_month' => 0,
             ])->saveQuietly();
         }
     }
@@ -174,6 +219,8 @@ class PlanEntitlements
         $aiCap = self::aiChatMonthlyCap($user);
         $imgCap = self::image3dMonthlyCap($user);
 
+        $idCap = self::interiorDesignMonthlyCap($user);
+
         return [
             'planTier' => self::normalizePlanTier($user->plan_tier ?? 'free'),
             'trialEndsAt' => $user->trial_ends_at?->toISOString(),
@@ -184,6 +231,8 @@ class PlanEntitlements
             'image3dMonthlyLimit' => $imgCap,
             'image3dRemaining' => self::image3dRemaining($user),
             'inFirstImage3dBonusWindow' => $hasSub && self::inFirstImage3dBonusWindow($user),
+            'interiorDesignMonthlyLimit' => $idCap,
+            'interiorDesignRemaining' => self::interiorDesignRemaining($user),
             'publishedLayouts' => self::allowsPublishedLayouts($user),
             'customTheme' => self::allowsCustomTheme($user),
             'bespokeDesign' => self::allowsBespokeDesign($user),

@@ -24,7 +24,7 @@ class UpdateMaterialRequest extends FormRequest
     {
         $typeSlugs = [
             'laminate', 'mdf', 'wood', 'worktop', 'slide', 'hinge', 'handle',
-            'metal', 'fabric', 'boucle', 'glass', 'plastic', 'leather', 'stone',
+            'metal', 'fabric', 'paper', 'boucle', 'glass', 'plastic', 'leather', 'stone',
         ];
 
         return [
@@ -36,7 +36,7 @@ class UpdateMaterialRequest extends FormRequest
             'types.*' => ['string', 'max:50', Rule::in($typeSlugs)],
             'categories' => ['sometimes', 'array', 'min:1'],
             'categories.*' => ['string', 'max:50'],
-            'color' => ['sometimes', 'string', 'max:255'],
+            'color' => ['sometimes', 'nullable', 'string', 'max:255'],
             'color_hex' => ['sometimes', 'nullable', 'string', 'max:7'],
             'color_code' => ['sometimes', 'nullable', 'string', 'max:20'],
             'price' => ['sometimes', 'numeric', 'min:0'],
@@ -49,6 +49,11 @@ class UpdateMaterialRequest extends FormRequest
             'sheet_height_cm' => ['sometimes', 'nullable', 'numeric', 'min:1', 'max:600'],
             'grain_direction' => ['sometimes', 'nullable', 'in:along_width,along_height,none'],
             'kerf_mm' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:10'],
+            'texture_width_cm' => ['sometimes', 'nullable', 'numeric', 'min:1', 'max:5000'],
+            'texture_height_cm' => ['sometimes', 'nullable', 'numeric', 'min:1', 'max:5000'],
+            'product_width_cm' => ['sometimes', 'nullable', 'numeric', 'min:1', 'max:5000'],
+            'product_height_cm' => ['sometimes', 'nullable', 'numeric', 'min:1', 'max:5000'],
+            'floor_layout_pattern' => ['sometimes', 'nullable', 'in:aligned,staggered'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

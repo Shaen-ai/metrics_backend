@@ -8,6 +8,7 @@
  * - image3d_first_month / image3d_ongoing: caps — first_month applies for 30 days after
  *   users.image3d_bonus_anchor_at (set on Stripe subscribe / plan change), else created_at.
  * - ai_chat_monthly: null = unlimited
+ * - interior_design_monthly: null = unlimited (Enterprise); finite caps otherwise
  * - unsubscribed: no Stripe subscription (plan_tier "free"); all usage blocked — there is no free product tier.
  *
  * tiers_without_stripe_subscription: plan_tier slugs with full access without stripe_subscription_id (e.g. manual Enterprise invoices).
@@ -24,6 +25,7 @@ return [
         'image3d_first_month' => 0,
         'image3d_ongoing' => 0,
         'ai_chat_monthly' => 0,
+        'interior_design_monthly' => 0,
         'priority_processing' => false,
         'custom_domain' => false,
         'published_layouts' => false,
@@ -34,6 +36,7 @@ return [
         'image3d_first_month' => 100,
         'image3d_ongoing' => 25,
         'ai_chat_monthly' => 50,
+        'interior_design_monthly' => 100,
         'priority_processing' => false,
         'custom_domain' => false,
         'published_layouts' => false,
@@ -44,6 +47,7 @@ return [
         'image3d_first_month' => 200,
         'image3d_ongoing' => 55,
         'ai_chat_monthly' => 200,
+        'interior_design_monthly' => 200,
         'priority_processing' => false,
         'custom_domain' => true,
         'published_layouts' => false,
@@ -55,6 +59,7 @@ return [
         'image3d_first_month' => 400,
         'image3d_ongoing' => 100,
         'ai_chat_monthly' => null,
+        'interior_design_monthly' => 500,
         'priority_processing' => true,
         'custom_domain' => true,
         'published_layouts' => true,
@@ -65,6 +70,7 @@ return [
         'image3d_first_month' => 999999,
         'image3d_ongoing' => 999999,
         'ai_chat_monthly' => null,
+        'interior_design_monthly' => null,
         'priority_processing' => true,
         'custom_domain' => true,
         'published_layouts' => true,
