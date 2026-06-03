@@ -31,6 +31,8 @@ class StoreCatalogItemRequest extends FormRequest
             'additional_categories' => ['sometimes', 'nullable', 'array', 'max:50'],
             'additional_categories.*' => ['string', 'max:120'],
             'planner_subcategory' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'product_family' => ['sometimes', 'nullable', 'string', 'in:furniture,flooring,lighting,window_treatments,walls,home_appliances,home_accessories'],
+            'product_subtype' => ['sometimes', 'nullable', 'string', 'max:64'],
             'is_active' => ['sometimes', 'boolean'],
             'images' => ['sometimes', 'array'],
             'images.*' => ['string'],

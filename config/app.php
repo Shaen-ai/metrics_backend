@@ -25,6 +25,7 @@ return [
         'driver' => 'file',
     ],
     'frontend_admin_url' => env('FRONTEND_ADMIN_URL', 'http://localhost:3000'),
+    'frontend_vista_url' => env('FRONTEND_VISTA_URL', 'http://localhost:3003'),
     'frontend_public_url' => env('FRONTEND_PUBLIC_URL', 'http://localhost:3001'),
     'frontend_landing_url' => env('FRONTEND_LANDING_URL', env('FRONTEND_ADMIN_URL', 'http://localhost:3000')),
     /**

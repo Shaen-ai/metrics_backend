@@ -82,7 +82,7 @@ class StripeCheckoutController extends Controller
         Stripe::setApiKey($secret);
 
         try {
-            $trialDays = (int) config('stripe.subscription_trial_days', 14);
+            $trialDays = (int) config('stripe.subscription_trial_days', 0);
 
             $params = [
                 'mode' => 'subscription',

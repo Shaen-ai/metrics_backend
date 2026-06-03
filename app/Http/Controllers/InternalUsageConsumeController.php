@@ -29,6 +29,7 @@ class InternalUsageConsumeController extends Controller
             return response()->json(['message' => 'Unknown storefront.'], 404);
         }
 
+        // Subscription: gated by PlanEntitlements::hasActiveSubscription (off while enforceSubscriptionsAndPlanCaps() is false — see PlanEntitlements.php).
         if (! PlanEntitlements::hasActiveSubscription($user)) {
             return response()->json([
                 'message' => 'This workspace does not have an active subscription.',

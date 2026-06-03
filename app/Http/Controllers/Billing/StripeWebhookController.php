@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Billing;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Billing\StripePlanResolver;
+use App\Services\Tokens\TokenTopUpService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Stripe\Customer;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
 use Stripe\Subscription;
@@ -18,6 +20,10 @@ use UnexpectedValueException;
 
 class StripeWebhookController extends Controller
 {
+    public function __construct(
+        private readonly TokenTopUpService $tokenTopUpService,
+    ) {}
+
     public function handle(Request $request): Response
     {
         $secret = config('stripe.webhook_secret');
@@ -78,6 +84,23 @@ class StripeWebhookController extends Controller
 
     private function handleCheckoutSessionCompleted(object $session): void
     {
+        if (($session->mode ?? null) === 'payment') {
+            if (($session->metadata->purpose ?? null) === 'token_topup') {
+                $user = $this->resolveUserForCheckoutSession($session);
+                if ($user === null) {
+                    Log::notice('Stripe token top-up: no user matched', [
+                        'session_id' => $session->id ?? null,
+                    ]);
+
+                    return;
+                }
+
+                $this->tokenTopUpService->creditFromCheckoutSession($session, $user);
+            }
+
+            return;
+        }
+
         if (($session->mode ?? null) !== 'subscription') {
             return;
         }
@@ -224,7 +247,7 @@ class StripeWebhookController extends Controller
         $customerId = $session->customer ?? null;
         if (is_string($customerId) && $customerId !== '') {
             try {
-                $customer = \Stripe\Customer::retrieve($customerId);
+                $customer = Customer::retrieve($customerId);
                 $ce = $customer->email ?? null;
                 if (is_string($ce) && $ce !== '') {
                     return User::query()->where('email', $ce)->first();

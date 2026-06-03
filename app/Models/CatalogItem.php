@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\Catalog\Contracts\RerankableProduct;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CatalogItem extends Model
+class CatalogItem extends Model implements RerankableProduct
 {
     public $incrementing = false;
 
@@ -41,6 +42,15 @@ class CatalogItem extends Model
         'is_fabric_customizable',
         'fabric_parts',
         'for_design',
+        'product_family',
+        'product_subtype',
+        'material_tags',
+        'color_tags',
+        'ai_tags',
+        'ai_enriched_at',
+        'embedding_text',
+        'embedding_text_version',
+        'embedded_at',
         'surface_texture_width_cm',
         'surface_texture_height_cm',
         'surface_item_width_cm',
@@ -59,6 +69,11 @@ class CatalogItem extends Model
             'is_active' => 'boolean',
             'for_design' => 'boolean',
             'additional_categories' => 'array',
+            'material_tags' => 'array',
+            'color_tags' => 'array',
+            'ai_tags' => 'array',
+            'ai_enriched_at' => 'datetime',
+            'embedded_at' => 'datetime',
             'supports_outdoor_cushions' => 'boolean',
             'outdoor_cushion_defaults' => 'array',
             'is_fabric_customizable' => 'boolean',
@@ -121,5 +136,96 @@ class CatalogItem extends Model
         }
 
         return $out;
+    }
+
+    // ── RerankableProduct ──
+
+    private function toCm(float $value): float
+    {
+        if (($this->dimension_unit ?? 'cm') === 'inch') {
+            return $value * 2.54;
+        }
+
+        return $value;
+    }
+
+    public function getRerankId(): int|string
+    {
+        return (string) $this->id;
+    }
+
+    public function getWidthCm(): ?float
+    {
+        return $this->width !== null ? $this->toCm((float) $this->width) : null;
+    }
+
+    public function getDepthCm(): ?float
+    {
+        return $this->depth !== null ? $this->toCm((float) $this->depth) : null;
+    }
+
+    public function getHeightCm(): ?float
+    {
+        return $this->height !== null ? $this->toCm((float) $this->height) : null;
+    }
+
+    public function hasDimensions(): bool
+    {
+        return $this->width !== null && (float) $this->width > 0;
+    }
+
+    public function getProductFamily(): ?string
+    {
+        return $this->product_family;
+    }
+
+    public function getProductSubtype(): ?string
+    {
+        return $this->product_subtype;
+    }
+
+    public function getMaterialTags(): array
+    {
+        return is_array($this->material_tags) ? $this->material_tags : [];
+    }
+
+    public function getColorTags(): array
+    {
+        return is_array($this->color_tags) ? $this->color_tags : [];
+    }
+
+    public function getAiTags(): array
+    {
+        return is_array($this->ai_tags) ? $this->ai_tags : [];
+    }
+
+    public function getName(): string
+    {
+        return (string) ($this->name ?? '');
+    }
+
+    public function getNameEn(): ?string
+    {
+        return null;
+    }
+
+    public function getBrand(): ?string
+    {
+        return null;
+    }
+
+    public function getPrice(): float
+    {
+        return (float) ($this->price ?? 0);
+    }
+
+    public function getCutoutConfidence(): float
+    {
+        return 0.0;
+    }
+
+    public function getPriority(): int
+    {
+        return 0;
     }
 }

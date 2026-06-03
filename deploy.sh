@@ -53,6 +53,7 @@ $SSH "$SERVER" "set -e \
 echo "==> Installing and optimizing Laravel on server..."
 $SSH "$SERVER" "cd '$REMOTE_DIR' \
   && if [ ! -f .env ]; then echo 'Missing production .env in $REMOTE_DIR'; exit 1; fi \
+  && if ! grep -q '^APP_KEY=base64:' .env; then echo 'ERROR: .env is missing APP_KEY=base64:... — add one (php artisan key:generate) before deploy or OAuth/sessions will 500.'; exit 1; fi \
   && composer install --no-dev --optimize-autoloader \
   && (php artisan down || true)"
 

@@ -19,4 +19,10 @@ return [
 
     /** Public URL path that Nginx aliases to image_upload_path. */
     'image_upload_url_path' => env('IMAGE_UPLOAD_URL_PATH', '/files/images'),
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', rtrim((string) env('APP_URL', 'http://localhost'), '/').'/auth/social/google/callback'),
+    ],
 ];

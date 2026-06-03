@@ -45,7 +45,7 @@ class UpdateProfileRequest extends FormRequest
             'company_name' => ['sometimes', 'string', 'max:255'],
             'slug' => array_merge(['sometimes'], StorefrontSubdomain::slugRules($this->user()->id)),
             'logo' => ['sometimes', 'nullable', 'string'],
-            'language' => ['sometimes', 'in:en,ru'],
+            'language' => ['sometimes', 'in:en,ru,hy'],
             'currency' => ['sometimes', 'string', 'max:10'],
             'selected_mode_id' => ['sometimes', 'nullable', 'exists:modes,id'],
             'selected_sub_mode_ids' => ['sometimes', 'nullable', 'array'],

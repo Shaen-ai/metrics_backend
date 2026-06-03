@@ -22,6 +22,8 @@ class User extends Authenticatable
     protected $fillable = [
         'id',
         'email',
+        'google_id',
+        'user_type',
         'password',
         'name',
         'company_name',
@@ -52,6 +54,11 @@ class User extends Authenticatable
         'site_published_at',
         'interior_design_catalog_coverage_mode',
         'interior_design_catalog_coverage_value',
+        'token_balance',
+        'referral_code',
+        'referred_by_user_id',
+        'referral_tokens_earned',
+        'first_login_bonus_granted_at',
     ];
 
     protected $hidden = [
@@ -74,7 +81,18 @@ class User extends Authenticatable
             'image3d_bonus_anchor_at' => 'datetime',
             'usage_month_start' => 'date',
             'site_published_at' => 'datetime',
+            'first_login_bonus_granted_at' => 'datetime',
         ];
+    }
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by_user_id');
+    }
+
+    public function referralsGiven(): HasMany
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
     }
 
     public function selectedMode(): BelongsTo

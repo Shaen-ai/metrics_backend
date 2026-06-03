@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -51,6 +52,36 @@ class UploadController extends Controller
 
         return response()->json([
             'url' => $this->storeImageFile($file, 'materials', (string) $request->user()->id, $filename),
+        ]);
+    }
+
+    /**
+     * Public endpoint: storefront visitors upload a surface texture (floor / wall / ceiling / plinth).
+     * No auth required — scoped to the merchant identified by slug.
+     */
+    public function storePlannerSurfaceImage(Request $request, string $slug): JsonResponse
+    {
+        $user = User::where('slug', $slug)->first();
+        if (! $user) {
+            return response()->json(['message' => 'Unknown storefront.'], 404);
+        }
+
+        $file = $request->file('image');
+        $invalid = $this->invalidUploadResponse('image', $file);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:10240'],
+        ]);
+
+        $file = $request->file('image');
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
+        $filename = uniqid('psrf_', true).'.'.$ext;
+
+        return response()->json([
+            'url' => $this->storeImageFile($file, 'planner-surfaces', (string) $user->id, $filename),
         ]);
     }
 

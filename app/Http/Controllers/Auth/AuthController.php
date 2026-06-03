@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\PublishSiteRequest;
+use App\Http\Requests\RegisterConsumerRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SignupRequest;
-use App\Http\Requests\PublishSiteRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\VerifyEmailMailable;
 use App\Models\User;
+use App\Services\Tokens\TokenService;
 use App\Support\AuditLogger;
+use App\Support\SocialAuthHelper;
 use App\Support\StorefrontSubdomain;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +28,10 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly TokenService $tokenService,
+    ) {}
+
     public function register(SignupRequest $request): JsonResponse
     {
         $plainToken = Str::random(64);
@@ -55,6 +62,64 @@ class AuthController extends Controller
                 'email' => $registered->email,
                 'token' => $plainToken,
             ]);
+
+            Mail::to($registered->email)->send(new VerifyEmailMailable($registered, $verificationUrl));
+        } catch (\Throwable $e) {
+            if ($registered !== null) {
+                try {
+                    $registered->delete();
+                } catch (\Throwable $deleteError) {
+                    report($deleteError);
+                }
+            }
+            report($e);
+
+            return response()->json([
+                'message' => 'Registration could not be completed. If this persists, contact support.',
+            ], 503);
+        }
+
+        return response()->json([
+            'message' => 'Check your email for a link to verify your account before signing in.',
+        ], 201);
+    }
+
+    public function registerConsumer(RegisterConsumerRequest $request): JsonResponse
+    {
+        $plainToken = Str::random(64);
+        /** @var User|null $registered */
+        $registered = null;
+
+        try {
+            $registered = DB::transaction(function () use ($request, $plainToken) {
+                $companyName = SocialAuthHelper::companyNameFromProfile($request->name, $request->email);
+
+                return User::create([
+                    'id' => Str::uuid()->toString(),
+                    'email' => $request->email,
+                    'password' => $request->password,
+                    'name' => $request->name,
+                    'company_name' => $companyName,
+                    'slug' => SocialAuthHelper::uniqueSlug($companyName),
+                    'user_type' => 'consumer',
+                    'language' => $request->input('language', 'en'),
+                    'currency' => 'AMD',
+                    'plan_tier' => 'free',
+                    'trial_ends_at' => null,
+                    'email_verified_at' => null,
+                    'email_verification_token' => Hash::make($plainToken),
+                ]);
+            });
+
+            $apiBase = rtrim((string) config('app.api_public_url'), '/');
+            $verificationUrl = $apiBase.'/api/auth/verify-email?'.http_build_query([
+                'email' => $registered->email,
+                'token' => $plainToken,
+            ]);
+
+            if ($request->filled('referralCode')) {
+                $this->tokenService->applyReferralOnRegister($registered, $request->input('referralCode'));
+            }
 
             Mail::to($registered->email)->send(new VerifyEmailMailable($registered, $verificationUrl));
         } catch (\Throwable $e) {
@@ -110,7 +175,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-        $frontend = rtrim(config('app.frontend_admin_url'), '/');
+        $frontend = $this->frontendUrlForUser($user);
 
         if (! $user) {
             return redirect()->away($frontend.'/login?verification=invalid');
@@ -139,6 +204,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
+            if ($user && $user->google_id) {
+                return response()->json([
+                    'message' => 'This account uses Google sign-in. Continue with Google or reset your password if you added one.',
+                ], 401);
+            }
+
             return response()->json([
                 'message' => 'Invalid email or password',
             ], 401);
@@ -149,6 +220,12 @@ class AuthController extends Controller
                 'message' => 'Please verify your email using the link we sent you before signing in.',
             ], 403);
         }
+
+        $user = $this->tokenService->processPostAuth(
+            $user,
+            $request->header('X-Vista-Device-Id'),
+            $request->input('referralCode'),
+        );
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -263,5 +340,14 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Password has been reset. You can now sign in.']);
+    }
+
+    private function frontendUrlForUser(?User $user): string
+    {
+        if ($user !== null && ($user->user_type ?? 'business') === 'consumer') {
+            return rtrim((string) config('app.frontend_vista_url'), '/');
+        }
+
+        return rtrim((string) config('app.frontend_admin_url'), '/');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\Tokens\TokenService;
 use App\Support\PlanEntitlements;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -43,8 +44,14 @@ class UserResource extends JsonResource
             ],
             'createdAt' => $this->created_at?->toISOString(),
             'planTier' => PlanEntitlements::normalizePlanTier($this->plan_tier ?? 'free'),
-            'trialEndsAt' => $this->trial_ends_at?->toISOString(),
             'entitlements' => PlanEntitlements::toPublicArray($this->resource),
+            'tokenBalance' => (int) ($this->token_balance ?? 0),
+            'referralCode' => $this->referral_code,
+            'referralTokensEarned' => (int) ($this->referral_tokens_earned ?? 0),
+            'referralLink' => $this->when(
+                ($this->user_type ?? '') === 'consumer',
+                fn () => app(TokenService::class)->referralUrl($this->resource),
+            ),
         ];
     }
 }

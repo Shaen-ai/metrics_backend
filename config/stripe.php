@@ -45,6 +45,16 @@ return [
     /** Stripe Price ID => plan_tier slug (for webhooks). */
     'price_plan_tiers' => $priceToTier,
 
-    /** Checkout Session subscription trial (days). Set 0 to disable. Requires payment method on file before trial. */
-    'subscription_trial_days' => max(0, (int) env('STRIPE_SUBSCRIPTION_TRIAL_DAYS', 14)),
+    /** Checkout Session subscription trial (days). Set 0 to disable. */
+    'subscription_trial_days' => max(0, (int) env('STRIPE_SUBSCRIPTION_TRIAL_DAYS', 0)),
+
+    /**
+     * Vista token balance top-up — one-time Checkout on product prod_UXvrvDxfFdINyo (override via env).
+     * Uses the product default Price when set; otherwise inline custom_unit_amount. Tax added on top.
+     */
+    'token_topup_product_id' => trim((string) env('STRIPE_PRODUCT_TOKEN_TOPUP', 'prod_UXvrvDxfFdINyo')),
+    'token_topup_currency' => strtolower(trim((string) env('STRIPE_TOKEN_TOPUP_CURRENCY', 'amd'))) ?: 'amd',
+
+    /** Stripe Checkout UI language for Vista token top-up (`auto` = browser locale, or e.g. `ru`). */
+    'vista_checkout_locale' => trim((string) env('STRIPE_VISTA_CHECKOUT_LOCALE', 'auto')) ?: 'auto',
 ];

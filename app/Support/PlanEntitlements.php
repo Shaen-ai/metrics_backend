@@ -7,6 +7,15 @@ use Carbon\Carbon;
 
 class PlanEntitlements
 {
+    /**
+     * When false, subscription checks are skipped and Enterprise quotas apply to everyone (unlimited AI chat / interior design caps).
+     * Set to true when Stripe billing and per-plan limits are ready.
+     */
+    private static function enforceSubscriptionsAndPlanCaps(): bool
+    {
+        return false;
+    }
+
     /** Map legacy DB/config slugs to canonical plan_tier keys. */
     public static function normalizePlanTier(?string $raw): string
     {
@@ -26,6 +35,10 @@ class PlanEntitlements
      */
     public static function hasActiveSubscription(User $user): bool
     {
+        if (! self::enforceSubscriptionsAndPlanCaps()) {
+            return true;
+        }
+
         if (($user->stripe_subscription_id ?? '') !== '') {
             return true;
         }
@@ -44,19 +57,18 @@ class PlanEntitlements
         return is_array(config("plans.{$tier}"));
     }
 
-    /** Stripe Billing trial window (requires payment method — no cardless product tier). */
-    public static function onActiveTrial(User $user): bool
-    {
-        if (! self::hasActiveSubscription($user)) {
-            return false;
-        }
-
-        return $user->trial_ends_at !== null && Carbon::now()->lt($user->trial_ends_at);
-    }
-
     /** @return array<string, mixed> */
     public static function basePlanRow(User $user): array
     {
+        if (! self::enforceSubscriptionsAndPlanCaps()) {
+            $enterprise = config('plans.enterprise');
+            if (is_array($enterprise)) {
+                return $enterprise;
+            }
+
+            return [];
+        }
+
         if (! self::hasActiveSubscription($user)) {
             $unsubscribed = config('plans.unsubscribed');
             if (is_array($unsubscribed)) {
@@ -223,8 +235,6 @@ class PlanEntitlements
 
         return [
             'planTier' => self::normalizePlanTier($user->plan_tier ?? 'free'),
-            'trialEndsAt' => $user->trial_ends_at?->toISOString(),
-            'onTrial' => self::onActiveTrial($user),
             'subscriptionActive' => $hasSub,
             'aiChatMonthlyLimit' => $aiCap,
             'aiChatRemaining' => self::aiChatRemaining($user),

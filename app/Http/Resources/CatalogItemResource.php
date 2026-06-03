@@ -50,6 +50,8 @@ class CatalogItemResource extends JsonResource
             'surfaceItemWidthCm' => $this->surface_item_width_cm !== null ? (float) $this->surface_item_width_cm : null,
             'surfaceItemHeightCm' => $this->surface_item_height_cm !== null ? (float) $this->surface_item_height_cm : null,
             'surfaceLayoutPattern' => $this->surface_layout_pattern,
+            'productFamily' => $this->product_family,
+            'productSubtype' => $this->product_subtype,
             'createdAt' => $this->created_at?->toISOString(),
         ];
     }
