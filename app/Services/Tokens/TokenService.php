@@ -282,18 +282,37 @@ class TokenService
             $user = $this->ensureReferralCode($user);
 
             $isReferred = $user->referred_by_user_id !== null;
-            $bonus = $isReferred
-                ? (int) config('tokens.referral_invitee_bonus', 40)
-                : (int) config('tokens.login_bonus', 20);
+            $loginBonus = (int) config('tokens.login_bonus', 20);
+            $referralExtra = $isReferred ? (int) config('tokens.referral_invitee_bonus', 0) : 0;
+            $startingBalance = (int) $user->token_balance;
+            $newBalance = $startingBalance + $loginBonus + $referralExtra;
 
-            $newBalance = (int) $user->token_balance + $bonus;
             $user->forceFill([
                 'token_balance' => $newBalance,
                 'first_login_bonus_granted_at' => now(),
             ])->save();
 
-            $type = $isReferred ? 'referral_invitee_bonus' : 'login_bonus';
-            $this->recordTransaction($user->id, null, $type, $bonus, $newBalance, $isReferred ? 'Referral signup bonus' : 'First login bonus');
+            if ($loginBonus > 0) {
+                $this->recordTransaction(
+                    $user->id,
+                    null,
+                    'login_bonus',
+                    $loginBonus,
+                    $startingBalance + $loginBonus,
+                    'First login bonus',
+                );
+            }
+
+            if ($referralExtra > 0) {
+                $this->recordTransaction(
+                    $user->id,
+                    null,
+                    'referral_invitee_bonus',
+                    $referralExtra,
+                    $newBalance,
+                    'Referral signup bonus',
+                );
+            }
 
             if ($isReferred) {
                 $this->creditReferrer($user);

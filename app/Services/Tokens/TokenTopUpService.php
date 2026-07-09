@@ -50,6 +50,7 @@ class TokenTopUpService
 
         $subtotalMinor = (int) ($session->amount_subtotal ?? 0);
         $currency = strtolower((string) ($session->currency ?? config('stripe.token_topup_currency', 'amd')));
+        $minorUnitsPerToken = $this->minorUnitsPerToken($currency);
         $tokens = $this->tokensFromSubtotal($subtotalMinor, $currency);
 
         if ($tokens <= 0) {
@@ -58,6 +59,7 @@ class TokenTopUpService
                 'amount_subtotal_minor' => $subtotalMinor,
                 'amount_major' => StripeCurrency::toMajorUnits($subtotalMinor, $currency),
                 'currency' => $currency,
+                'minor_units_per_token' => $minorUnitsPerToken,
             ]);
 
             return [
@@ -112,6 +114,7 @@ class TokenTopUpService
                     'currency_exponent' => StripeCurrency::minorUnitExponent($currency),
                     'amount_tax_minor' => (int) ($session->total_details->amount_tax ?? 0),
                     'amount_total_minor' => (int) ($session->amount_total ?? 0),
+                    'minor_units_per_token' => $minorUnitsPerToken,
                     'amd_per_token' => $this->tokenService->amdPerToken(),
                 ],
             ]);
@@ -126,17 +129,35 @@ class TokenTopUpService
 
     public function tokensFromSubtotal(int $subtotalMinorUnits, string $currency): int
     {
-        $expectedCurrency = strtolower((string) config('stripe.token_topup_currency', 'amd'));
-        if (strtolower($currency) !== $expectedCurrency) {
+        $currency = strtolower(trim($currency));
+        $minorUnitsPerToken = $this->minorUnitsPerToken($currency);
+
+        if ($minorUnitsPerToken <= 0) {
+            Log::warning('Token top-up: unsupported currency', [
+                'currency' => $currency,
+                'amount_subtotal_minor' => $subtotalMinorUnits,
+            ]);
+
             return 0;
         }
 
-        $majorAmount = StripeCurrency::toMajorUnits($subtotalMinorUnits, $currency);
-        $amdPerToken = $this->tokenService->amdPerToken();
-        if ($amdPerToken <= 0 || $majorAmount < $amdPerToken) {
+        if ($subtotalMinorUnits < $minorUnitsPerToken) {
             return 0;
         }
 
-        return intdiv($majorAmount, $amdPerToken);
+        return intdiv($subtotalMinorUnits, $minorUnitsPerToken);
+    }
+
+    public function minorUnitsPerToken(string $currency): int
+    {
+        $currency = strtolower(trim($currency));
+        $rates = config('tokens.topup_minor_units_per_token', []);
+
+        return (int) ($rates[$currency] ?? 0);
+    }
+
+    public function currencyForCountry(string $countryCode): string
+    {
+        return strtoupper(trim($countryCode)) === 'AM' ? 'amd' : 'usd';
     }
 }

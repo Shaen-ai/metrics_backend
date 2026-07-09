@@ -49,10 +49,12 @@ return [
     'subscription_trial_days' => max(0, (int) env('STRIPE_SUBSCRIPTION_TRIAL_DAYS', 0)),
 
     /**
-     * Vista token balance top-up — one-time Checkout on product prod_UXvrvDxfFdINyo (override via env).
-     * Uses the product default Price when set; otherwise inline custom_unit_amount. Tax added on top.
+     * Vista token balance top-up — one-time Checkout (AMD + USD products).
+     * Uses each product's default Price when set; otherwise inline custom_unit_amount. Tax added on top.
      */
     'token_topup_product_id' => trim((string) env('STRIPE_PRODUCT_TOKEN_TOPUP', 'prod_UXvrvDxfFdINyo')),
+    'token_topup_product_id_usd' => trim((string) env('STRIPE_PRODUCT_TOKEN_TOPUP_USD', 'prod_UpU0k9BJnYtDay')),
+    /** Default checkout currency when the client does not send `currency` (amd | usd). */
     'token_topup_currency' => strtolower(trim((string) env('STRIPE_TOKEN_TOPUP_CURRENCY', 'amd'))) ?: 'amd',
 
     /** Stripe Checkout UI language for Vista token top-up (`auto` = browser locale, or e.g. `ru`). */

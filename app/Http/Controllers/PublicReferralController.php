@@ -24,7 +24,7 @@ class PublicReferralController extends Controller
             'data' => [
                 'valid' => true,
                 'referrerFirstName' => $firstName !== '' ? $firstName : 'Your friend',
-                'inviteeBonus' => (int) config('tokens.referral_invitee_bonus', 40),
+                'inviteeBonus' => (int) config('tokens.referral_invitee_bonus', 0),
             ],
         ]);
     }

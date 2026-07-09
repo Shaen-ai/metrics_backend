@@ -210,10 +210,10 @@ class MaterialController extends Controller
             ]);
         }
 
-        $fresh = $user->materials()->whereIn('id', $validated['ids'])->get();
-
+        // $material->update() mutates each model in place, so $materials already reflects
+        // the new values — no need to re-query the same rows.
         return response()->json([
-            'data' => MaterialResource::collection($fresh),
+            'data' => MaterialResource::collection($materials),
         ]);
     }
 }

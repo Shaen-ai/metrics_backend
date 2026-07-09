@@ -35,16 +35,9 @@ class CountryDetector
             if ($response->successful()) {
                 $data = $response->json();
                 if (($data['status'] ?? '') === 'success' && ! empty($data['countryCode'])) {
+                    // Return the raw ISO code even outside the marketplace list —
+                    // callers (e.g. top-up currency) need the real country.
                     $code = strtoupper($data['countryCode']);
-
-                    $supported = array_keys(config('marketplaces.countries', []));
-                    if (in_array($code, $supported, true)) {
-                        Cache::put($cacheKey, $code, self::CACHE_TTL);
-
-                        return $code;
-                    }
-
-                    // Country detected but not in our supported list — cache raw and return default
                     Cache::put($cacheKey, $code, self::CACHE_TTL);
 
                     return $code;

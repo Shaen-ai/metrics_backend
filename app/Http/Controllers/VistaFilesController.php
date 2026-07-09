@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\VistaFilePath;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,14 +22,15 @@ class VistaFilesController extends Controller
         }
 
         $disk = Storage::disk('vista_files');
-        if (! $disk->exists($path)) {
+        $resolvedPath = VistaFilePath::resolveExistingPath($disk, $path);
+        if ($resolvedPath === null) {
             abort(404);
         }
 
-        $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+        $mime = $disk->mimeType($resolvedPath) ?: 'application/octet-stream';
 
-        return response()->stream(function () use ($disk, $path) {
-            $stream = $disk->readStream($path);
+        return response()->stream(function () use ($disk, $resolvedPath) {
+            $stream = $disk->readStream($resolvedPath);
             if ($stream === false) {
                 return;
             }

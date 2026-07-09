@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Billing;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\LiveSearch\CountryDetector;
 use App\Services\Tokens\TokenTopUpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class TokenTopUpCheckoutController extends Controller
 {
     public function __construct(
         private readonly TokenTopUpService $tokenTopUpService,
+        private readonly CountryDetector $countryDetector,
     ) {}
 
     public function create(Request $request): JsonResponse
@@ -32,22 +34,26 @@ class TokenTopUpCheckoutController extends Controller
             ], 503);
         }
 
-        $productId = trim((string) config('stripe.token_topup_product_id'));
-        if ($productId === '') {
-            return response()->json([
-                'message' => 'Token top-up is not configured. Set STRIPE_PRODUCT_TOKEN_TOPUP in backend/.env.',
-            ], 503);
-        }
+        Stripe::setApiKey($secret);
 
         $vistaBase = rtrim((string) config('app.frontend_vista_url'), '/');
         if ($vistaBase === '') {
             return response()->json(['message' => 'FRONTEND_VISTA_URL is not configured.'], 503);
         }
 
-        Stripe::setApiKey($secret);
+        $countryCode = $this->resolveTopUpCountry($request);
+        $currency = $this->tokenTopUpService->currencyForCountry($countryCode);
+        $productId = $this->productIdForCurrency($currency);
+        if ($productId === '') {
+            return response()->json([
+                'message' => $currency === 'usd'
+                    ? 'USD token top-up is not configured. Set STRIPE_PRODUCT_TOKEN_TOPUP_USD in backend/.env.'
+                    : 'Token top-up is not configured. Set STRIPE_PRODUCT_TOKEN_TOPUP in backend/.env.',
+            ], 503);
+        }
 
         try {
-            $lineItems = $this->lineItemsForProduct($productId);
+            $lineItems = $this->lineItemsForProduct($productId, $currency);
 
             $params = [
                 'mode' => 'payment',
@@ -58,6 +64,8 @@ class TokenTopUpCheckoutController extends Controller
                 'metadata' => [
                     'purpose' => 'token_topup',
                     'user_id' => $user->id,
+                    'currency' => $currency,
+                    'country_code' => $countryCode,
                 ],
                 'automatic_tax' => ['enabled' => true],
                 'billing_address_collection' => 'required',
@@ -172,15 +180,37 @@ class TokenTopUpCheckoutController extends Controller
         return null;
     }
 
+    private function resolveTopUpCountry(Request $request): string
+    {
+        $fromBody = strtoupper(trim((string) $request->input('countryCode', '')));
+        if (preg_match('/^[A-Z]{2}$/', $fromBody) === 1) {
+            return $fromBody;
+        }
+
+        return $this->countryDetector->detect($request->ip());
+    }
+
+    private function productIdForCurrency(string $currency): string
+    {
+        if ($currency === 'usd') {
+            return trim((string) config('stripe.token_topup_product_id_usd'));
+        }
+
+        return trim((string) config('stripe.token_topup_product_id'));
+    }
+
     /**
      * @return list<array<string, mixed>>
      */
-    private function lineItemsForProduct(string $productId): array
+    private function lineItemsForProduct(string $productId, string $currency): array
     {
-        $currency = (string) config('stripe.token_topup_currency', 'amd');
-        $amdPerToken = (int) config('tokens.amd_per_token', 40);
-        $minimum = max($amdPerToken * 10, $amdPerToken);
-        $preset = max($amdPerToken * 100, $minimum);
+        $minorUnitsPerToken = $this->tokenTopUpService->minorUnitsPerToken($currency);
+        if ($minorUnitsPerToken <= 0) {
+            $minorUnitsPerToken = $currency === 'usd' ? 10 : 4000;
+        }
+
+        $minimum = $minorUnitsPerToken * 10;
+        $preset = $minorUnitsPerToken * 100;
 
         try {
             $product = Product::retrieve($productId, ['expand' => ['default_price']]);

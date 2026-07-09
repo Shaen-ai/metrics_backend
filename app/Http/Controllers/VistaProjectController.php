@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 
 class VistaProjectController extends Controller
 {
+    private const MAX_INSPIRATION_IMAGES = 4;
+
     private function disk(): Filesystem
     {
         return Storage::disk('vista_files');
@@ -28,17 +30,33 @@ class VistaProjectController extends Controller
 
     private function resolveCoverImageUrl(VistaProject $project): ?string
     {
-        if ($project->cover_image_path) {
-            return $this->fileUrl($project->cover_image_path);
-        }
-        if ($project->floor_plan_path) {
-            return $this->fileUrl($project->floor_plan_path);
-        }
-        if ($project->room_image_path) {
-            return $this->fileUrl($project->room_image_path);
+        foreach ([
+            $project->cover_image_path,
+            $project->floor_plan_path,
+            $project->room_image_path,
+        ] as $path) {
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+
+            $resolved = VistaFilePath::resolveExistingPath($this->disk(), $path);
+            if ($resolved !== null) {
+                return $this->fileUrl($resolved);
+            }
         }
 
         return null;
+    }
+
+    private function resolveFileUrl(?string $path): ?string
+    {
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $resolved = VistaFilePath::resolveExistingPath($this->disk(), $path);
+
+        return $resolved !== null ? $this->fileUrl($resolved) : null;
     }
 
     private function saveFloorPlanFromBase64(string $userId, string $projectId, string $base64, string $mime): ?string
@@ -77,6 +95,82 @@ class VistaProjectController extends Controller
         $id = $preferences['orchestratorProjectId'] ?? null;
 
         return is_string($id) && $id !== '' ? $id : null;
+    }
+
+    /** @return list<array{path: string, label: string, mime: string, url: string}> */
+    private function inspirationImagesFromPreferences(?array $preferences): array
+    {
+        if (! is_array($preferences)) {
+            return [];
+        }
+        $raw = $preferences['inspirationImages'] ?? [];
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($raw as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $path = $item['path'] ?? null;
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+            $out[] = [
+                'path' => $path,
+                'label' => is_string($item['label'] ?? null) ? $item['label'] : '',
+                'mime' => is_string($item['mime'] ?? null) ? $item['mime'] : 'image/jpeg',
+                'url' => $this->fileUrl($path),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  list<array{base64?: string, mime?: string, label?: string}>  $images
+     */
+    private function applyInspirationUpload(VistaProject $project, string $userId, array $images): void
+    {
+        $images = array_slice($images, 0, self::MAX_INSPIRATION_IMAGES);
+        $preferences = is_array($project->preferences) ? $project->preferences : [];
+        $previous = $preferences['inspirationImages'] ?? [];
+        if (is_array($previous)) {
+            foreach ($previous as $old) {
+                if (is_array($old) && is_string($old['path'] ?? null) && $old['path'] !== '') {
+                    $this->disk()->delete($old['path']);
+                }
+            }
+        }
+
+        $stored = [];
+        foreach ($images as $index => $image) {
+            if (! is_array($image)) {
+                continue;
+            }
+            $base64 = $image['base64'] ?? null;
+            if (! is_string($base64) || $base64 === '') {
+                continue;
+            }
+            $decoded = base64_decode($base64, true);
+            if ($decoded === false) {
+                continue;
+            }
+            $mime = is_string($image['mime'] ?? null) ? $image['mime'] : 'image/jpeg';
+            $ext = VistaFilePath::extensionFromMime($mime);
+            $path = VistaFilePath::inspiration($userId, $project->id, $index, $ext);
+            $this->disk()->put($path, $decoded);
+            $label = is_string($image['label'] ?? null) ? $image['label'] : '';
+            $stored[] = [
+                'path' => $path,
+                'label' => $label,
+                'mime' => $mime,
+            ];
+        }
+
+        $preferences['inspirationImages'] = $stored;
+        $project->update(['preferences' => $preferences]);
     }
 
     /**
@@ -222,16 +316,26 @@ class VistaProjectController extends Controller
             'floor_plan_mime' => 'nullable|string|max:48',
             'preferences' => 'nullable|array',
             'pdf_path' => 'nullable|string|max:500',
+            'inspiration_images' => 'nullable|array|max:'.self::MAX_INSPIRATION_IMAGES,
+            'inspiration_images.*.base64' => 'required_with:inspiration_images|string',
+            'inspiration_images.*.mime' => 'nullable|string|max:48',
+            'inspiration_images.*.label' => 'nullable|string|max:255',
         ]);
 
         $floorPlanBase64 = $data['floor_plan_base64'] ?? null;
         $floorPlanMime = $data['floor_plan_mime'] ?? 'image/jpeg';
-        unset($data['floor_plan_base64'], $data['floor_plan_mime']);
+        $inspirationImages = $data['inspiration_images'] ?? null;
+        unset($data['floor_plan_base64'], $data['floor_plan_mime'], $data['inspiration_images']);
 
         $project->update(array_filter($data, fn ($v) => $v !== null));
 
         if (! empty($floorPlanBase64)) {
             $this->applyFloorPlanUpload($project, $request->user()->id, $floorPlanBase64, $floorPlanMime);
+            $project->refresh();
+        }
+
+        if ($inspirationImages !== null) {
+            $this->applyInspirationUpload($project, $request->user()->id, $inspirationImages);
             $project->refresh();
         }
 
@@ -277,6 +381,7 @@ class VistaProjectController extends Controller
             'type' => 'nullable|string|in:generated,edited,regenerated',
             'room_id' => 'nullable|string|max:50',
             'angle_index' => 'nullable|integer|min:0|max:10',
+            'repair_missing' => 'nullable|boolean',
         ]);
 
         $decoded = base64_decode($data['base64'], true);
@@ -286,6 +391,15 @@ class VistaProjectController extends Controller
 
         $mime = $data['mime_type'] ?? 'image/png';
         $ext = VistaFilePath::extensionFromMime($mime);
+        $repairMissing = (bool) ($data['repair_missing'] ?? false);
+
+        if ($repairMissing) {
+            $repaired = $this->repairMissingVersion($project, $user->id, $data, $decoded, $mime, $ext);
+            if ($repaired !== null) {
+                return $repaired;
+            }
+        }
+
         $nextVersion = $project->version_count + 1;
 
         if ($project->mode === 'project' && ! empty($data['room_id'])) {
@@ -337,6 +451,76 @@ class VistaProjectController extends Controller
                 'created_at' => $version->created_at?->toISOString(),
             ],
         ], 201);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function repairMissingVersion(
+        VistaProject $project,
+        string $userId,
+        array $data,
+        string $decoded,
+        string $mime,
+        string $ext,
+    ): ?JsonResponse {
+        $versionNumber = 1;
+        $angleIndex = $data['angle_index'] ?? 0;
+        $roomId = $data['room_id'] ?? null;
+
+        if ($project->mode === 'project' && ! empty($roomId)) {
+            $path = VistaFilePath::roomVersion($userId, $project->id, $roomId, $versionNumber, $angleIndex, $ext);
+            $versionQuery = VistaProjectVersion::where('project_id', $project->id)
+                ->where('version_number', $versionNumber)
+                ->where('room_id', $roomId);
+        } else {
+            $path = VistaFilePath::version($project->mode, $userId, $project->id, $versionNumber, $ext);
+            $versionQuery = VistaProjectVersion::where('project_id', $project->id)
+                ->where('version_number', $versionNumber);
+        }
+
+        $existingVersion = $versionQuery->first();
+        if ($existingVersion === null) {
+            return null;
+        }
+
+        if (VistaFilePath::resolveExistingPath($this->disk(), $existingVersion->file_path) !== null) {
+            return response()->json([
+                'data' => [
+                    'id' => $existingVersion->id,
+                    'file_url' => $this->fileUrl($existingVersion->file_path),
+                    'version_number' => $existingVersion->version_number,
+                    'type' => $existingVersion->type,
+                    'created_at' => $existingVersion->created_at?->toISOString(),
+                    'repaired' => false,
+                ],
+            ]);
+        }
+
+        $previousPath = $existingVersion->file_path;
+        $this->disk()->put($path, $decoded);
+        $existingVersion->update([
+            'file_path' => $path,
+            'mime_type' => $mime,
+            'file_size_bytes' => strlen($decoded),
+        ]);
+
+        if ($project->cover_image_path === null || $project->cover_image_path === $previousPath) {
+            $project->update(['cover_image_path' => $path]);
+        }
+
+        $project->update(['last_interaction_at' => now()]);
+
+        return response()->json([
+            'data' => [
+                'id' => $existingVersion->id,
+                'file_url' => $this->fileUrl($path),
+                'version_number' => $existingVersion->version_number,
+                'type' => $existingVersion->type,
+                'created_at' => $existingVersion->created_at?->toISOString(),
+                'repaired' => true,
+            ],
+        ]);
     }
 
     /**
@@ -412,14 +596,15 @@ class VistaProjectController extends Controller
             'cover_image_url' => $this->resolveCoverImageUrl($project),
             'status' => $project->status,
             'style' => $project->style,
-            'room_image_url' => $project->room_image_path ? $this->fileUrl($project->room_image_path) : null,
+            'room_image_url' => $this->resolveFileUrl($project->room_image_path),
             'room_analysis' => $project->room_analysis,
             'room_geometry' => $project->room_geometry,
-            'floor_plan_url' => $project->floor_plan_path ? $this->fileUrl($project->floor_plan_path) : null,
+            'floor_plan_url' => $this->resolveFileUrl($project->floor_plan_path),
             'floor_plan_analysis' => $project->floor_plan_analysis,
             'master_concept' => $project->master_concept,
             'room_results' => $project->room_results,
             'preferences' => $project->preferences,
+            'inspiration_images' => $this->inspirationImagesFromPreferences($project->preferences),
             'pdf_url' => $project->pdf_path ? $this->fileUrl($project->pdf_path) : null,
             'message_count' => $project->message_count,
             'version_count' => $project->version_count,

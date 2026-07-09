@@ -113,13 +113,16 @@ class CatalogRerankService
             $priceScore = $this->priceScore($product, $constraints['max_price'] ?? null);
             $cutoutScore = $this->clamp01($product->getCutoutConfidence());
             $priorityScore = min(1.0, $product->getPriority() / 10.0);
-            $roomScore = $this->roomScore($product, $roomType);
+            // Parse the product's ai_tags['rooms'] once; both the room score and the
+            // "has room tags" diversity nudge below derive from the same parsed list.
+            $roomTags = $this->extractRoomTags($product);
+            $roomScore = $this->roomScoreForTags($roomTags, $roomType);
 
             $diversityPenalty = in_array($id, $alreadyChosenIds, true)
                 ? 1.0
                 : $this->brandNamePenalty($product, $products, $alreadyChosenIds);
 
-            if ($roomType !== '' && $roomScore === 0.0 && $this->productHasRoomTags($product)) {
+            if ($roomType !== '' && $roomScore === 0.0 && $roomTags !== []) {
                 $diversityPenalty = max($diversityPenalty, 0.35);
             }
 
@@ -230,18 +233,44 @@ class CatalogRerankService
         return max(0, 1 - (($product->getPrice() - $maxPrice) / max(1, $maxPrice)));
     }
 
+    /**
+     * Parse a product's ai_tags['rooms'] into a list of room strings, splitting a
+     * CSV string form into trimmed parts. Returns [] when there are no usable tags.
+     *
+     * @return array<int, mixed>
+     */
     private function roomScore(RerankableProduct $product, string $roomType): float
     {
-        if ($roomType === '') {
-            return 0.5;
-        }
+        return $this->roomScoreForTags($this->extractRoomTags($product), $roomType);
+    }
 
+    /**
+     * Parse a product's ai_tags['rooms'] into a list of room strings, splitting a
+     * CSV string form into trimmed parts. Returns [] when there are no usable tags.
+     *
+     * @return array<int, mixed>
+     */
+    private function extractRoomTags(RerankableProduct $product): array
+    {
         $ai = $product->getAiTags();
         $productRooms = $ai['rooms'] ?? null;
         if (! is_array($productRooms) && is_string($productRooms)) {
             $productRooms = array_map('trim', explode(',', $productRooms));
         }
-        if (! is_array($productRooms) || $productRooms === []) {
+
+        return is_array($productRooms) ? $productRooms : [];
+    }
+
+    /**
+     * @param  array<int, mixed>  $productRooms
+     */
+    private function roomScoreForTags(array $productRooms, string $roomType): float
+    {
+        if ($roomType === '') {
+            return 0.5;
+        }
+
+        if ($productRooms === []) {
             return 0.3;
         }
 
@@ -262,17 +291,6 @@ class CatalogRerankService
     private function normalizeRoomTag(string $value): string
     {
         return mb_strtolower(trim(str_replace(['_', '-'], ' ', $value)));
-    }
-
-    private function productHasRoomTags(RerankableProduct $product): bool
-    {
-        $ai = $product->getAiTags();
-        $productRooms = $ai['rooms'] ?? null;
-        if (! is_array($productRooms) && is_string($productRooms)) {
-            $productRooms = array_map('trim', explode(',', $productRooms));
-        }
-
-        return is_array($productRooms) && $productRooms !== [];
     }
 
     /**

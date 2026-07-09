@@ -183,6 +183,7 @@ Route::prefix('public/{slug}')->group(function () {
 
 Route::post('/internal/usage/consume', [InternalUsageConsumeController::class, 'consume']);
 Route::post('/internal/notify/slot-failure', [InternalNotificationController::class, 'slotFailure']);
+Route::post('/internal/notify/vista-issue', [InternalNotificationController::class, 'vistaIssue']);
 Route::post('/internal/tokens/consume', [InternalTokenConsumeController::class, 'consume']);
 Route::post('/internal/design-projects/{id}/update', [DesignProjectController::class, 'internalUpdate']);
 Route::post('/internal/design-projects/{id}/images', [DesignProjectController::class, 'internalStoreImage']);
