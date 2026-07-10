@@ -79,8 +79,12 @@ class ScrapedProduct extends Model implements RerankableProduct
     }
 
     /** Higher `priority` values appear first; null = no priority. */
-    public function scopeOrderByCatalogPriority($query)
+    public function scopeOrderByCatalogPriority($query, ?string $productFamily = null)
     {
+        if ($productFamily === 'flooring') {
+            $query->orderByRaw("CASE product_subtype WHEN 'laminate' THEN 0 WHEN 'tile' THEN 1 ELSE 2 END");
+        }
+
         return $query->orderByRaw('priority IS NULL, priority DESC');
     }
 

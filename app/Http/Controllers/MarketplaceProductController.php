@@ -46,7 +46,8 @@ class MarketplaceProductController extends Controller
         // Public consumer endpoint: unavailable products are never returned,
         // regardless of the (legacy, still validated) in_stock request param.
         // Products without a display image are hidden too.
-        $query->inStock()->withImage();
+        // Null product_family rows (cookware, towel rails, excluded re-scrapes) stay out of browse.
+        $query->inStock()->withImage()->whereNotNull('product_family');
 
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
@@ -75,7 +76,7 @@ class MarketplaceProductController extends Controller
 
         $perPage = $request->input('per_page', 20);
         $results = $query
-            ->orderByCatalogPriority()
+            ->orderByCatalogPriority($request->input('product_family'))
             ->select([
                 'id', 'source_marketplace', 'external_url', 'slug',
                 'name', 'name_en', 'category', 'category_en', 'brand',
@@ -125,7 +126,8 @@ class MarketplaceProductController extends Controller
         // Public consumer endpoint: unavailable products are never returned,
         // regardless of the (legacy, still validated) in_stock request param.
         // Products without a display image are hidden too.
-        $query->inStock()->withImage();
+        // Null product_family rows (cookware, towel rails, excluded re-scrapes) stay out of browse.
+        $query->inStock()->withImage()->whereNotNull('product_family');
 
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
@@ -154,7 +156,7 @@ class MarketplaceProductController extends Controller
 
         $perPage = $request->input('per_page', 50);
         $results = $query
-            ->orderByCatalogPriority()
+            ->orderByCatalogPriority($request->input('product_family'))
             ->select([
                 'id', 'source_marketplace', 'external_url', 'slug',
                 'name', 'name_en', 'category', 'category_en', 'brand',

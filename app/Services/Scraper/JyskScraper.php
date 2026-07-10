@@ -20,12 +20,9 @@ class JyskScraper extends BaseScraper
      * @var list<string>
      */
     private const CATEGORY_SEEDS = [
-        'https://jysk.am/en/products/bathroom_2518/bath-mats_3014/',
         'https://jysk.am/en/products/bathroom_2518/shower-curtains_3013/',
         'https://jysk.am/en/products/bathroom_2518/bathroom-equipment_3015/',
         'https://jysk.am/en/products/bedroom_2517/bed-frames_3089/',
-        'https://jysk.am/en/products/bedroom_2517/bed-throws_2858/',
-        'https://jysk.am/en/products/bedroom_2517/pillows_3010/',
         'https://jysk.am/en/products/office_2519/office-chairs_3016/',
         'https://jysk.am/en/products/office_2519/desks-computer-desks_2779/',
         'https://jysk.am/en/products/office_2519/office-accessories_2785/',
@@ -53,15 +50,12 @@ class JyskScraper extends BaseScraper
         'https://jysk.am/en/products/storage_2522/clothes-rails_3102/',
         'https://jysk.am/en/products/curtains_2523/ready-made-curtains_3025/',
         'https://jysk.am/en/products/homeware_2525/decoration_3033/',
-        'https://jysk.am/en/products/homeware_2525/throws_3037/',
         'https://jysk.am/en/products/homeware_2525/kids-products_3046/',
-        'https://jysk.am/en/products/homeware_2525/tea-towels_2870/',
         'https://jysk.am/en/products/homeware_2525/table-linen_3038/',
         'https://jysk.am/en/products/homeware_2525/laundry_3035/',
         'https://jysk.am/en/products/homeware_2525/kitchen_3260/',
         'https://jysk.am/en/products/homeware_2525/mirrors_2791/',
         'https://jysk.am/en/products/homeware_2525/lighting_3036/',
-        'https://jysk.am/en/products/homeware_2525/cushions_3045/',
         'https://jysk.am/en/products/homeware_2525/hides_2883/',
     ];
 

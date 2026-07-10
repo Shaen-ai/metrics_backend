@@ -23,6 +23,12 @@ class ProductTaxonomyClassifier
     {
         $nameHay = mb_strtolower(trim($name));
 
+        if (ExcludedScrapedProduct::isExcluded($name)
+            || ExcludedScrapedProduct::isCatalogHidden($name)
+        ) {
+            return null;
+        }
+
         // Exclusions: kitchen/cookware names should not fall through to furniture
         if ($this->matches($nameHay, [
             'casserole', 'casserol', 'milk pot', 'saucepan', 'frying pan', 'cookware',
@@ -58,12 +64,6 @@ class ProductTaxonomyClassifier
         ) {
             return ['product_family' => 'furniture', 'product_subtype' => 'bed'];
         }
-        if ($this->isBedTextileProduct($nameHay)) {
-            return ['product_family' => 'home_accessories', 'product_subtype' => null];
-        }
-        if ($this->isSeasonalSoftDecor($nameHay)) {
-            return ['product_family' => 'home_accessories', 'product_subtype' => null];
-        }
         if ($this->isDecorativeCurtainLighting($nameHay)) {
             return ['product_family' => 'lighting', 'product_subtype' => null];
         }
@@ -89,10 +89,6 @@ class ProductTaxonomyClassifier
         }
         if ($this->matches($nameHay, ['chair ']) && ! $this->matches($nameHay, ['lamp', 'light'])) {
             return ['product_family' => 'furniture', 'product_subtype' => 'chair'];
-        }
-        // Bath mats
-        if ($this->matches($nameHay, ['bath mat', 'bathtub mat', 'bath rug', 'shower mat', 'bathroom mat'])) {
-            return ['product_family' => 'flooring', 'product_subtype' => 'bath_mat'];
         }
         // Storage furniture
         if ($this->matches($nameHay, ['bookcase', 'shelving unit', 'sideboard', 'hallway unit'])) {
@@ -121,6 +117,12 @@ class ProductTaxonomyClassifier
     public function classify(string $name, ?string $categoryEn, ?string $category = null): array
     {
         $hay = mb_strtolower(trim($name.' '.($categoryEn ?? '').' '.($category ?? '')));
+
+        if (ExcludedScrapedProduct::isExcluded($name, null, $category, $categoryEn)
+            || ExcludedScrapedProduct::isCatalogHidden($name, null, $category, $categoryEn)
+        ) {
+            return $this->nullResult($hay);
+        }
 
         $family = null;
         $subtype = null;
@@ -158,10 +160,6 @@ class ProductTaxonomyClassifier
         } elseif ($this->matches($hay, ['door handle', 'door knob', 'door fitting', 'дверная ручка', 'ручка двери'])) {
             $family = 'walls';
             $subtype = 'door_handle';
-            // Bath / shower mats (before flooring to take priority)
-        } elseif ($this->matches($hay, ['bath mat', 'bathtub mat', 'bath rug', 'shower mat', 'bathroom mat'])) {
-            $family = 'flooring';
-            $subtype = 'bath_mat';
             // Mirrors
         } elseif ($this->matches($hay, ['mirror', 'зеркало', 'հայելի'])
             && ! $this->matches($hay, ['rear view', 'car mirror'])
@@ -199,12 +197,6 @@ class ProductTaxonomyClassifier
         ])) {
             $family = 'furniture';
             $subtype = 'decorative_plant';
-        } elseif ($this->isBedTextileProduct($hay)) {
-            $family = 'home_accessories';
-            $subtype = null;
-        } elseif ($this->isSeasonalSoftDecor($hay)) {
-            $family = 'home_accessories';
-            $subtype = null;
         } elseif ($this->matches($hay, [
             'laminate', 'parquet', 'flooring', 'tile', 'porcelain', 'vinyl', 'spc', 'lvt',
             'ковролин', 'ламинат', 'паркет', 'плитк', 'floor panel',
@@ -247,21 +239,20 @@ class ProductTaxonomyClassifier
         } elseif ($this->matches($hay, ['Սեղանի Լուսատուներ'])) {
             $family = 'lighting';
             $subtype = 'table';
-        } elseif ($this->matches($hay, ['Լուսատուներ', 'Լուսամփոփներ', 'Ճաղաշարքային'])) {
+        } elseif ($this->matches($hay, ['Լուսամփոփներ', 'Ճաղաշարքային'])) {
             $family = 'lighting';
             $subtype = null;
             // Lighting — 'light' removed intentionally to prevent matching "LIGHT CAPPUCCINO" bed names
         } elseif ($this->matches($hay, [
-            'chandelier', 'pendant', 'sconce', 'luminaire', 'lamp', 'люстр', 'светильник', 'spotlight',
-            'wall light', 'ceiling light', 'floor light', 'table light', 'track light', 'led light',
+            'chandelier', 'pendant', 'sconce', 'luminaire', 'люстр', 'светильник', 'spotlight',
+            'wall light', 'ceiling light', 'table light', 'track light', 'led light',
+            'table lamp', 'battery lamp', 'lampshade', 'lamp shade', 'cordless lamp',
         ])) {
             $family = 'lighting';
             $subtype = $this->firstMatch($hay, [
                 'chandelier' => 'ceiling',
                 'pendant' => 'pendant',
                 'ceiling' => 'ceiling',
-                'floor lamp' => 'floor',
-                'floor light' => 'floor',
                 'table lamp' => 'table',
                 'table light' => 'table',
                 'wall light' => 'wall',
@@ -362,29 +353,6 @@ class ProductTaxonomyClassifier
         $category = isset($productPayload['category']) ? (string) $productPayload['category'] : null;
 
         return array_merge($productPayload, $this->classify($name, $categoryEn, $category));
-    }
-
-    /**
-     * Bed textiles (blankets, plaids) — not flooring or window treatments.
-     */
-    private function isBedTextileProduct(string $hay): bool
-    {
-        return $this->matches($hay, [
-            'blanket', 'plaid', 'throw', 'duvet', 'comforter', 'bedding', 'bed linen', 'bed sheet',
-            'pillow', 'cushion',
-        ]);
-    }
-
-    /**
-     * Seasonal pillows/throws (e.g. XMAS TREE pillow mis-tagged as flooring/tile).
-     */
-    private function isSeasonalSoftDecor(string $hay): bool
-    {
-        if (! $this->matches($hay, ['pillow', 'cushion', 'blanket', 'plaid', 'throw'])) {
-            return false;
-        }
-
-        return $this->matches($hay, ['xmas', 'christmas', 'noel', 'holiday', 'festive']);
     }
 
     /**

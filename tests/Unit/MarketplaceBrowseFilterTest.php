@@ -59,6 +59,8 @@ class MarketplaceBrowseFilterTest extends TestCase
             'price' => 10000,
             'in_stock' => true,
             'main_image_url' => 'https://example.com/image.jpg',
+            'product_family' => 'furniture',
+            'product_subtype' => 'sofa',
         ], $attrs));
     }
 
@@ -185,6 +187,32 @@ class MarketplaceBrowseFilterTest extends TestCase
         $this->assertContains('Sofa Unavailable', $names);
     }
 
+    public function test_browse_never_returns_null_product_family(): void
+    {
+        $this->createProduct(['name' => 'Sofa With Family', 'product_family' => 'furniture', 'product_subtype' => 'sofa']);
+        $this->createProduct(['name' => 'Towel Rail Hidden', 'product_family' => null, 'product_subtype' => null]);
+
+        $response = $this->getJson('/api/marketplace/products/browse');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertContains('Sofa With Family', $names);
+        $this->assertNotContains('Towel Rail Hidden', $names);
+    }
+
+    public function test_search_never_returns_null_product_family(): void
+    {
+        $this->createProduct(['name' => 'Sofa With Family']);
+        $this->createProduct(['name' => 'Towel Rail Hidden', 'product_family' => null, 'product_subtype' => null]);
+
+        $response = $this->getJson('/api/marketplace/products/search?q=sofa');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertContains('Sofa With Family', $names);
+        $this->assertNotContains('Towel Rail Hidden', $names);
+    }
+
     public function test_browse_product_subtypes_takes_precedence_over_product_subtype(): void
     {
         $this->createProduct(['name' => 'Sofa A', 'product_family' => 'furniture', 'product_subtype' => 'sofa']);
@@ -200,5 +228,33 @@ class MarketplaceBrowseFilterTest extends TestCase
         $this->assertContains('Sofa A', $names);
         $this->assertContains('Desk C', $names);
         $this->assertNotContains('Chair B', $names);
+    }
+
+    public function test_browse_flooring_orders_laminate_before_tile(): void
+    {
+        $this->createProduct([
+            'name' => 'Porcelain Tile Grey',
+            'product_family' => 'flooring',
+            'product_subtype' => 'tile',
+            'priority' => 100,
+        ]);
+        $this->createProduct([
+            'name' => 'Laminate Oak 8mm',
+            'product_family' => 'flooring',
+            'product_subtype' => 'laminate',
+            'priority' => 1,
+        ]);
+        $this->createProduct([
+            'name' => 'Vinyl Plank',
+            'product_family' => 'flooring',
+            'product_subtype' => 'vinyl',
+            'priority' => 200,
+        ]);
+
+        $response = $this->getJson('/api/marketplace/products/browse?product_family=flooring');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertSame(['Laminate Oak 8mm', 'Porcelain Tile Grey', 'Vinyl Plank'], $names);
     }
 }

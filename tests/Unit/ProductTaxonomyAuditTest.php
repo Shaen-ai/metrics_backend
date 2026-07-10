@@ -69,10 +69,10 @@ class ProductTaxonomyAuditTest extends TestCase
     public function test_drift_detected_when_subtype_changed(): void
     {
         $product = new ScrapedProduct([
-            'name' => 'Floor lamp KENT #30xH140cm beige',
-            'category_en' => 'Lighting',
+            'name' => 'Pendant HAAKON Ø35cm rattan',
+            'category_en' => 'Ceiling lights',
             'product_family' => 'lighting',
-            'product_subtype' => 'ceiling',
+            'product_subtype' => 'floor',
         ]);
         $product->id = 500;
 
@@ -80,7 +80,7 @@ class ProductTaxonomyAuditTest extends TestCase
 
         $this->assertNotNull($anomaly);
         $this->assertSame('drift', $anomaly['reason']);
-        $this->assertSame('floor', $anomaly['expected_subtype']);
+        $this->assertSame('pendant', $anomaly['expected_subtype']);
     }
 
     public function test_anomaly_for_payload_catches_scrape_time_mismatch(): void
@@ -101,10 +101,10 @@ class ProductTaxonomyAuditTest extends TestCase
     public function test_anomaly_for_payload_returns_null_when_ok(): void
     {
         $anomaly = ProductTaxonomyAudit::anomalyForPayload(
-            'Floor lamp KENT beige',
+            'Pendant HAAKON beige',
             'Lighting',
             'lighting',
-            'floor',
+            'pendant',
         );
 
         $this->assertNull($anomaly);

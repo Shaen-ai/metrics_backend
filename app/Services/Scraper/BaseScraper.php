@@ -4,8 +4,10 @@ namespace App\Services\Scraper;
 
 use App\Models\ScrapedProduct;
 use App\Models\ScrapeUrl;
+use App\Services\Catalog\ExcludedScrapedProduct;
 use App\Services\Catalog\ProductTaxonomyAudit;
 use App\Services\Catalog\ProductTaxonomyClassifier;
+use App\Services\Catalog\QdrantCatalogClient;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
@@ -96,10 +98,14 @@ abstract class BaseScraper
                             $scrapeUrl->markFailed('Could not parse product data — likely not a product page');
                             $this->log('  SKIP: No data parsed (not a real product)', $command);
                         } else {
-                            $this->upsertProduct($data, $scrapeUrl);
+                            $product = $this->upsertProduct($data, $scrapeUrl);
                             $scrapeUrl->markDone();
-                            $scraped++;
-                            $this->log("  OK: {$data['name']} — {$data['price']} AMD", $command);
+                            if ($product !== null) {
+                                $scraped++;
+                                $this->log("  OK: {$data['name']} — {$data['price']} AMD", $command);
+                            } else {
+                                $this->log('  SKIP: Excluded product type — purged if existed', $command);
+                            }
                         }
                     }
                 }
@@ -276,10 +282,20 @@ abstract class BaseScraper
         return strlen($html) < 2000;
     }
 
-    protected function upsertProduct(array $data, ScrapeUrl $scrapeUrl): ScrapedProduct
+    protected function upsertProduct(array $data, ScrapeUrl $scrapeUrl): ?ScrapedProduct
     {
         $externalUrl = $data['product_url'] ?? $scrapeUrl->url;
         unset($data['product_url']);
+
+        $name = (string) ($data['name_en'] ?? $data['name'] ?? '');
+        $category = isset($data['category']) ? (string) $data['category'] : null;
+        $categoryEn = isset($data['category_en']) ? (string) $data['category_en'] : null;
+
+        if (ExcludedScrapedProduct::isExcluded($name, $data['name_en'] ?? null, $category, $categoryEn)) {
+            $this->purgeProductAtUrl($externalUrl);
+
+            return null;
+        }
 
         $data = app(ProductTaxonomyClassifier::class)->enrichPayload($data);
 
@@ -351,9 +367,52 @@ abstract class BaseScraper
             $payload
         );
 
+        if (ExcludedScrapedProduct::isCatalogHidden($name, $data['name_en'] ?? null, $category, $categoryEn)) {
+            $this->stripFromQdrant($product);
+            if ($product->product_family !== null || $product->product_subtype !== null || $product->embedded_at !== null) {
+                $product->update([
+                    'product_family' => null,
+                    'product_subtype' => null,
+                    'embedded_at' => null,
+                ]);
+            }
+        }
+
         $scrapeUrl->update(['last_verified_at' => now()]);
 
         return $product;
+    }
+
+    protected function purgeProductAtUrl(string $externalUrl): void
+    {
+        $urlHash = hash('sha256', $externalUrl);
+
+        $existing = ScrapedProduct::where('source_marketplace', $this->getMarketplace())
+            ->where('external_url_hash', $urlHash)
+            ->first();
+
+        if ($existing === null) {
+            return;
+        }
+
+        $this->stripFromQdrant($existing);
+        $existing->delete();
+    }
+
+    protected function stripFromQdrant(ScrapedProduct $product): void
+    {
+        if ($product->embedded_at === null) {
+            return;
+        }
+
+        try {
+            app(QdrantCatalogClient::class)->deleteProduct($product->id);
+        } catch (\Throwable $e) {
+            Log::warning('catalog.scrape_qdrant_delete_failed', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function hasMeaningfulChanges(ScrapedProduct $existing, array $new): bool

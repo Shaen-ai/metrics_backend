@@ -48,12 +48,12 @@ class ProductTaxonomyClassifierTest extends TestCase
         $this->assertSame('pendant', $result['product_subtype']);
     }
 
-    public function test_floor_lamp_stays_lighting_not_furniture(): void
+    public function test_floor_lamp_is_excluded(): void
     {
         $result = $this->classifier->classify('Floor lamp KENT #30xH140cm beige', null, null);
 
-        $this->assertSame('lighting', $result['product_family']);
-        $this->assertSame('floor', $result['product_subtype']);
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
     }
 
     public function test_curtain_in_wrong_category_still_window_treatments(): void
@@ -76,7 +76,7 @@ class ProductTaxonomyClassifierTest extends TestCase
         $this->assertNotSame('curtain', $result['product_subtype']);
     }
 
-    public function test_blanket_is_home_accessories_not_flooring(): void
+    public function test_blanket_is_excluded(): void
     {
         $result = $this->classifier->classify(
             'Blanket winter RESTFUL PR19QV75V40 BW 150X210 BM LIGHT',
@@ -84,12 +84,11 @@ class ProductTaxonomyClassifierTest extends TestCase
             null,
         );
 
-        $this->assertSame('home_accessories', $result['product_family']);
-        $this->assertNotSame('tile', $result['product_subtype']);
-        $this->assertNotSame('flooring', $result['product_family']);
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
     }
 
-    public function test_plaid_is_home_accessories_not_flooring(): void
+    public function test_plaid_is_excluded(): void
     {
         $result = $this->classifier->classify(
             'Plaid RESTFUL AC 170X200 LZ COFFEE',
@@ -97,8 +96,8 @@ class ProductTaxonomyClassifierTest extends TestCase
             null,
         );
 
-        $this->assertSame('home_accessories', $result['product_family']);
-        $this->assertNotSame('tile', $result['product_subtype']);
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
     }
 
     public function test_real_curtain_with_light_color_stays_window_treatments(): void
@@ -109,7 +108,7 @@ class ProductTaxonomyClassifierTest extends TestCase
         $this->assertSame('curtain', $result['product_subtype']);
     }
 
-    public function test_pillow_mis_tagged_as_flooring_becomes_home_accessories(): void
+    public function test_pillow_is_excluded(): void
     {
         $result = $this->classifier->classify(
             'Pillow KOOPMAN XMAS TREE 30X50CM (AAE820060)',
@@ -117,17 +116,15 @@ class ProductTaxonomyClassifierTest extends TestCase
             null,
         );
 
-        $this->assertSame('home_accessories', $result['product_family']);
-        $this->assertNotSame('tile', $result['product_subtype']);
-        $this->assertNotSame('flooring', $result['product_family']);
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
     }
 
-    public function test_xmas_pillow_not_flooring_via_name_first(): void
+    public function test_xmas_pillow_excluded_via_name_first(): void
     {
         $result = $this->classifier->classifyFromName('Pillow KOOPMAN XMAS TREE 30X50CM');
 
-        $this->assertNotNull($result);
-        $this->assertSame('home_accessories', $result['product_family']);
+        $this->assertNull($result);
     }
 
     public function test_tv_stand_name_wins_over_lighting_category(): void
@@ -202,12 +199,28 @@ class ProductTaxonomyClassifierTest extends TestCase
         $this->assertSame('chair', $result['product_subtype']);
     }
 
-    public function test_bath_mat_classified_as_flooring(): void
+    public function test_bath_mat_is_excluded(): void
     {
         $result = $this->classifier->classify('Bath mat KARLSTAD Ø70 light grey', 'Bathroom', null);
 
-        $this->assertSame('flooring', $result['product_family']);
-        $this->assertSame('bath_mat', $result['product_subtype']);
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
+    }
+
+    public function test_table_lamp_stays_lighting(): void
+    {
+        $result = $this->classifier->classify('Table lamp KOOPMAN 23X34CM BLACK', null, null);
+
+        $this->assertSame('lighting', $result['product_family']);
+        $this->assertSame('table', $result['product_subtype']);
+    }
+
+    public function test_towel_rail_has_null_family(): void
+    {
+        $result = $this->classifier->classify('Towel rail KARLSTAD chrome', null, null);
+
+        $this->assertNull($result['product_family']);
+        $this->assertNull($result['product_subtype']);
     }
 
     public function test_bookcase_classified_as_storage(): void

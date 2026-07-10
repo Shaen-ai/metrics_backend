@@ -12,6 +12,9 @@ class VegaScraper extends BaseScraper
 
     private const BASE_EN = 'https://vega.am/en/';
 
+    /** Reject concatenated digit blobs from parent .price containers. */
+    private const MAX_AMD_PRICE = 50_000_000;
+
     /**
      * Only scrape products from these categories and their subcategories.
      * These are the home/furniture/interior-relevant sections of Vega.
@@ -312,14 +315,14 @@ class VegaScraper extends BaseScraper
         }
 
         // Detect non-product pages: if there's no price element and no product image, skip
-        $price = $this->extractPrice($crawler, $html);
+        $prices = $this->extractPrices($crawler, $html);
+        $price = $prices['price'];
+        $oldPrice = $prices['old_price'];
         $images = $this->extractImages($crawler);
 
         if ($price === 0 && empty($images)) {
             return null; // Not a real product page (could be category, info page, etc.)
         }
-
-        $oldPrice = $this->extractOldPrice($crawler);
         $inStock = $this->checkInStock($crawler);
         $category = $this->extractCategory($crawler);
         $brand = $this->extractBrand($crawler);
@@ -369,50 +372,143 @@ class VegaScraper extends BaseScraper
         }
     }
 
-    private function extractPrice(Crawler $crawler, string $html = ''): int
+    /**
+     * @return array{price: int, old_price: int|null}
+     */
+    private function extractPrices(Crawler $crawler, string $html = ''): array
     {
         try {
-            $node = $crawler->filter('.product-center .price .price-new #price-special');
-            if ($node->count()) {
-                $parsed = $this->parseAmdPrice($node->text());
-                if ($parsed > 0) {
-                    return $parsed;
+            $mainBlock = $this->findMainPriceBlock($crawler);
+            if ($mainBlock !== null && $mainBlock->count()) {
+                $fromAttrs = $this->extractPricesFromDataAttributes($mainBlock);
+                if ($fromAttrs['price'] > 0) {
+                    return $fromAttrs;
+                }
+
+                $fromText = $this->extractPricesFromVisibleText($mainBlock);
+                if ($fromText['price'] > 0) {
+                    return $fromText;
                 }
             }
 
-            $node = $crawler->filter('.product-center .price #price-new');
-            if ($node->count()) {
-                $parsed = $this->parseAmdPrice($node->text());
-                if ($parsed > 0) {
-                    return $parsed;
-                }
-            }
-
-            $node = $crawler->filter('.product-center .price');
-            if ($node->count()) {
-                $parsed = $this->parseAmdPrice($node->text());
-                if ($parsed > 0) {
-                    return $parsed;
-                }
-            }
-
-            $node = $crawler->filter('[class*="price"]');
-            if ($node->count()) {
-                foreach ($node as $element) {
-                    $parsed = $this->parseAmdPrice((new Crawler($element))->text());
-                    if ($parsed >= 1000) {
-                        return $parsed;
+            foreach ([
+                '.product-center .price .price-new #price-special',
+                '.product-center .price #price-new',
+                '.product-center .price .price-new',
+            ] as $selector) {
+                $node = $crawler->filter($selector)->first();
+                if ($node->count()) {
+                    $parsed = $this->normalizeAmdPrice($this->parseAmdPrice($node->text()));
+                    if ($parsed !== null) {
+                        return ['price' => $parsed, 'old_price' => null];
                     }
                 }
             }
         } catch (\Throwable) {
         }
 
+        $price = 0;
         if ($html !== '') {
-            return $this->extractPriceFromHtml($html);
+            $price = $this->normalizeAmdPrice($this->extractPriceFromHtml($html)) ?? 0;
         }
 
-        return 0;
+        return ['price' => $price, 'old_price' => null];
+    }
+
+    private function findMainPriceBlock(Crawler $crawler): ?Crawler
+    {
+        foreach ([
+            '.product-center .price[data-price-unit]',
+            '.product-center .price[data-special-unit]',
+            '.product-center .price',
+        ] as $selector) {
+            $node = $crawler->filter($selector)->first();
+            if ($node->count()) {
+                return $node;
+            }
+        }
+
+        $node = $crawler->filter('.price[data-price-unit], .price[data-special-unit]')->first();
+
+        return $node->count() ? $node : null;
+    }
+
+    /**
+     * @return array{price: int, old_price: int|null}
+     */
+    private function extractPricesFromDataAttributes(Crawler $block): array
+    {
+        $regular = $this->readPriceAttribute($block, 'data-price-unit', 'data-price-value');
+        $special = $this->readPriceAttribute($block, 'data-special-unit', 'data-special-value');
+
+        if ($special !== null && $special > 0) {
+            $oldPrice = ($regular !== null && $regular > $special) ? $regular : null;
+
+            return ['price' => $special, 'old_price' => $oldPrice];
+        }
+
+        if ($regular !== null && $regular > 0) {
+            return ['price' => $regular, 'old_price' => null];
+        }
+
+        return ['price' => 0, 'old_price' => null];
+    }
+
+    private function readPriceAttribute(Crawler $node, string ...$attrs): ?int
+    {
+        foreach ($attrs as $attr) {
+            $raw = $node->attr($attr);
+            if ($raw === null || $raw === '') {
+                continue;
+            }
+            $parsed = $this->normalizeAmdPrice((int) preg_replace('/[^\d]/', '', $raw));
+            if ($parsed !== null) {
+                return $parsed;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{price: int, old_price: int|null}
+     */
+    private function extractPricesFromVisibleText(Crawler $block): array
+    {
+        $price = 0;
+        $oldPrice = null;
+
+        $newNode = $block->filter('.price-new')->first();
+        if ($newNode->count()) {
+            $price = $this->normalizeAmdPrice($this->parseAmdPrice($newNode->text())) ?? 0;
+        }
+
+        foreach (['.price-old.product-old-price-main', '.price-old'] as $selector) {
+            $oldNode = $block->filter($selector)->first();
+            if (! $oldNode->count()) {
+                continue;
+            }
+            $parsed = $this->normalizeAmdPrice($this->parseAmdPrice($oldNode->text()));
+            if ($parsed !== null) {
+                $oldPrice = $parsed;
+                break;
+            }
+        }
+
+        if ($oldPrice !== null && $oldPrice <= $price) {
+            $oldPrice = null;
+        }
+
+        return ['price' => $price, 'old_price' => $oldPrice];
+    }
+
+    private function normalizeAmdPrice(int $value): ?int
+    {
+        if ($value <= 0 || $value > self::MAX_AMD_PRICE) {
+            return null;
+        }
+
+        return $value;
     }
 
     private function extractPriceFromHtml(string $html): int
@@ -503,21 +599,6 @@ class VegaScraper extends BaseScraper
         }
 
         return 0;
-    }
-
-    private function extractOldPrice(Crawler $crawler): ?int
-    {
-        try {
-            $node = $crawler->filter('.product-center .price .price-old-prin');
-            if ($node->count()) {
-                $val = $this->parseAmdPrice($node->text());
-
-                return $val > 0 ? $val : null;
-            }
-        } catch (\Throwable) {
-        }
-
-        return null;
     }
 
     private function parseAmdPrice(string $text): int
