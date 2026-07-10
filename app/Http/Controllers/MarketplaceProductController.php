@@ -43,9 +43,10 @@ class MarketplaceProductController extends Controller
             $query->withDimensions();
         }
 
-        if ($request->boolean('in_stock', true)) {
-            $query->inStock();
-        }
+        // Public consumer endpoint: unavailable products are never returned,
+        // regardless of the (legacy, still validated) in_stock request param.
+        // Products without a display image are hidden too.
+        $query->inStock()->withImage();
 
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
@@ -121,11 +122,10 @@ class MarketplaceProductController extends Controller
             $query->withDimensions();
         }
 
-        if ($request->has('in_stock')) {
-            if ($request->boolean('in_stock')) {
-                $query->inStock();
-            }
-        }
+        // Public consumer endpoint: unavailable products are never returned,
+        // regardless of the (legacy, still validated) in_stock request param.
+        // Products without a display image are hidden too.
+        $query->inStock()->withImage();
 
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
@@ -194,6 +194,9 @@ class MarketplaceProductController extends Controller
             return response()->json(['message' => 'Maximum 50 products per request.'], 422);
         }
 
+        // Intentionally no inStock() filter: this hydrates products the user
+        // already selected (design boards) — silently dropping a saved product
+        // is worse than showing one that went unavailable.
         $products = ScrapedProduct::whereIn('id', $ids)
             ->withPrice()
             ->orderByCatalogPriority()

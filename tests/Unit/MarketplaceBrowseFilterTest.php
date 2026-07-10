@@ -58,6 +58,7 @@ class MarketplaceBrowseFilterTest extends TestCase
             'name' => 'Product',
             'price' => 10000,
             'in_stock' => true,
+            'main_image_url' => 'https://example.com/image.jpg',
         ], $attrs));
     }
 
@@ -109,6 +110,79 @@ class MarketplaceBrowseFilterTest extends TestCase
         $data = $response->json('data');
         $this->assertCount(1, $data);
         $this->assertSame('Sofa A', $data[0]['name']);
+    }
+
+    public function test_browse_never_returns_unavailable_products(): void
+    {
+        $this->createProduct(['name' => 'Sofa Available']);
+        $this->createProduct(['name' => 'Sofa Unavailable', 'in_stock' => false, 'unavailable_at' => now()]);
+
+        foreach (['', '?in_stock=0', '?in_stock=1'] as $suffix) {
+            $response = $this->getJson('/api/marketplace/products/browse'.$suffix);
+
+            $response->assertOk();
+            $names = array_column($response->json('data'), 'name');
+            $this->assertContains('Sofa Available', $names, "browse{$suffix}");
+            $this->assertNotContains('Sofa Unavailable', $names, "browse{$suffix}");
+        }
+    }
+
+    public function test_search_never_returns_unavailable_products(): void
+    {
+        $this->createProduct(['name' => 'Sofa Available']);
+        $this->createProduct(['name' => 'Sofa Unavailable', 'in_stock' => false, 'unavailable_at' => now()]);
+
+        foreach (['', '&in_stock=0', '&in_stock=1'] as $suffix) {
+            $response = $this->getJson('/api/marketplace/products/search?q=sofa'.$suffix);
+
+            $response->assertOk();
+            $names = array_column($response->json('data'), 'name');
+            $this->assertContains('Sofa Available', $names, "search{$suffix}");
+            $this->assertNotContains('Sofa Unavailable', $names, "search{$suffix}");
+        }
+    }
+
+    public function test_browse_never_returns_products_without_image(): void
+    {
+        $this->createProduct(['name' => 'Sofa With Image']);
+        $this->createProduct(['name' => 'Sofa Null Image', 'main_image_url' => null]);
+        $this->createProduct(['name' => 'Sofa Empty Image', 'main_image_url' => '']);
+
+        $response = $this->getJson('/api/marketplace/products/browse');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertContains('Sofa With Image', $names);
+        $this->assertNotContains('Sofa Null Image', $names);
+        $this->assertNotContains('Sofa Empty Image', $names);
+    }
+
+    public function test_search_never_returns_products_without_image(): void
+    {
+        $this->createProduct(['name' => 'Sofa With Image']);
+        $this->createProduct(['name' => 'Sofa Null Image', 'main_image_url' => null]);
+        $this->createProduct(['name' => 'Sofa Empty Image', 'main_image_url' => '']);
+
+        $response = $this->getJson('/api/marketplace/products/search?q=sofa');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertContains('Sofa With Image', $names);
+        $this->assertNotContains('Sofa Null Image', $names);
+        $this->assertNotContains('Sofa Empty Image', $names);
+    }
+
+    public function test_by_ids_still_returns_unavailable_products(): void
+    {
+        $available = $this->createProduct(['name' => 'Sofa Available']);
+        $unavailable = $this->createProduct(['name' => 'Sofa Unavailable', 'in_stock' => false, 'unavailable_at' => now()]);
+
+        $response = $this->getJson('/api/marketplace/products/by-ids?ids='.$available->id.','.$unavailable->id);
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertContains('Sofa Available', $names);
+        $this->assertContains('Sofa Unavailable', $names);
     }
 
     public function test_browse_product_subtypes_takes_precedence_over_product_subtype(): void

@@ -99,6 +99,11 @@ class ScrapedProduct extends Model implements RerankableProduct
         return $query->where('in_stock', true);
     }
 
+    public function scopeWithImage($query)
+    {
+        return $query->whereNotNull('main_image_url')->where('main_image_url', '!=', '');
+    }
+
     public function scopeWithPrice($query)
     {
         return $query->where('price', '>', 0);
