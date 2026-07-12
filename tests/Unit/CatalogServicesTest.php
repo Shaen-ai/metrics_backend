@@ -12,6 +12,7 @@ use App\Services\Catalog\ProductSubtypeNormalizer;
 use App\Services\Catalog\ProductTaxonomyClassifier;
 use App\Services\Catalog\QdrantCatalogClient;
 use App\Services\Catalog\RoomSubtypePolicy;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 
 class CatalogServicesTest extends TestCase
@@ -315,5 +316,65 @@ class CatalogServicesTest extends TestCase
 
         $pot = $classifier->classify('Casserols FALEZ CREAMY 18CM MILK POT', 'Kitchen', null);
         $this->assertNull($pot['product_family']);
+    }
+
+    public function test_qdrant_search_batch_parses_grouped_hits(): void
+    {
+        config([
+            'catalog.qdrant.url' => 'http://qdrant.test',
+            'catalog.qdrant.collection' => 'catalog_products_v1',
+        ]);
+
+        Http::fake([
+            'http://qdrant.test/collections/catalog_products_v1/points/search/batch' => Http::response([
+                'result' => [
+                    [
+                        [
+                            'id' => 11,
+                            'score' => 0.91,
+                            'payload' => ['product_id' => 11, 'product_family' => 'furniture'],
+                        ],
+                    ],
+                    [
+                        [
+                            'id' => 22,
+                            'score' => 0.82,
+                            'payload' => ['product_id' => 22, 'product_family' => 'lighting'],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $client = new QdrantCatalogClient;
+        $results = $client->searchBatch([
+            [
+                'vector' => [0.1, 0.2],
+                'limit' => 20,
+                'filterMust' => [
+                    ['key' => 'product_family', 'match' => ['value' => 'furniture']],
+                ],
+            ],
+            [
+                'vector' => [0.1, 0.2],
+                'limit' => 20,
+                'filterMust' => [
+                    ['key' => 'product_family', 'match' => ['value' => 'lighting']],
+                ],
+            ],
+        ]);
+
+        $this->assertCount(2, $results);
+        $this->assertSame(11, $results[0][0]['product_id']);
+        $this->assertSame(22, $results[1][0]['product_id']);
+
+        Http::assertSent(function ($request) {
+            $body = $request->data();
+            $this->assertCount(2, $body['searches']);
+            $this->assertSame(20, $body['searches'][0]['limit']);
+            $this->assertTrue($body['searches'][0]['with_payload']);
+
+            return str_ends_with($request->url(), '/collections/catalog_products_v1/points/search/batch');
+        });
     }
 }

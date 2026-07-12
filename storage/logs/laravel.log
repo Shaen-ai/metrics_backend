@@ -14834,3 +14834,4 @@ Laravel mail check
 [2026-07-09 10:51:59] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
 [2026-07-10 20:03:39] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
 [2026-07-10 20:32:35] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
+[2026-07-12 22:48:38] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 

@@ -112,6 +112,65 @@ class QdrantCatalogClient
         return $hits;
     }
 
+    /**
+     * @param  array<int, array{vector: array<int, float>, limit: int, filterMust?: array<int, array<string, mixed>>}>  $searches
+     * @return array<int, array<int, array{product_id: int, score: float, payload: array<string, mixed>}>>
+     */
+    public function searchBatch(array $searches): array
+    {
+        if ($searches === []) {
+            return [];
+        }
+
+        $name = $this->collectionName();
+        $payloadSearches = [];
+
+        foreach ($searches as $search) {
+            $body = [
+                'vector' => $search['vector'],
+                'limit' => $search['limit'],
+                'with_payload' => true,
+            ];
+
+            $filterMust = $search['filterMust'] ?? [];
+            if ($filterMust !== []) {
+                $body['filter'] = [
+                    'must' => array_values($filterMust),
+                ];
+            }
+
+            $payloadSearches[] = $body;
+        }
+
+        $response = $this->request('POST', "/collections/{$name}/points/search/batch", [
+            'searches' => $payloadSearches,
+        ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Qdrant batch search failed: '.$response->body());
+        }
+
+        $results = [];
+        foreach ($response->json('result', []) as $batchResult) {
+            $hits = [];
+            foreach ($batchResult as $row) {
+                $payload = is_array($row['payload'] ?? null) ? $row['payload'] : [];
+                $productId = (int) ($payload['product_id'] ?? $row['id'] ?? 0);
+                if ($productId <= 0) {
+                    continue;
+                }
+                $hits[] = [
+                    'product_id' => $productId,
+                    'score' => (float) ($row['score'] ?? 0),
+                    'payload' => $payload,
+                ];
+            }
+            $results[] = $hits;
+        }
+
+        return $results;
+    }
+
     public function deleteProduct(int $productId): void
     {
         $name = $this->collectionName();

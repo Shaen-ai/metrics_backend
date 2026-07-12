@@ -41,6 +41,13 @@ class CatalogSlotResolver
         $fallbackCount = 0;
         $dropRates = [];
         $filledSingletonSubtypes = [];
+        $recall = (int) config('catalog.qdrant.recall_limit', 20);
+        $prefetchMap = $this->prefetchPrimaryCandidates(
+            $intentVector,
+            $slots,
+            $allowlistIds,
+            $recall,
+        );
 
         foreach ($slots as $slot) {
             $family = trim((string) ($slot['family'] ?? ''));
@@ -84,6 +91,7 @@ class CatalogSlotResolver
                 $roomDimensions,
                 $constraints,
                 $roomType,
+                $prefetchMap,
             );
 
             if (($resolved['fallback_stage'] ?? null) !== null) {
@@ -129,9 +137,11 @@ class CatalogSlotResolver
         array $roomDimensions,
         array $constraints,
         string $roomType = '',
+        array $prefetchMap = [],
     ): array {
         $recall = (int) config('catalog.qdrant.recall_limit', 20);
         $subtype = ProductSubtypeNormalizer::normalize($family, $subtype);
+        $slotKey = $this->slotPrefetchKey($family, $subtype);
 
         // ── Pass 1: prioritized products only (priority >= 1) ──
         if ($intentVector !== []) {
@@ -139,6 +149,7 @@ class CatalogSlotResolver
                 $intentVector, $family, $subtype, $quantity,
                 $globalChosen, $allowlistIds, $roomDimensions,
                 $constraints, $roomType, $recall, 1,
+                $prefetchMap[$slotKey.'|priority'] ?? null,
             );
 
             if (count($priorityResult['picked']) >= $quantity) {
@@ -164,6 +175,7 @@ class CatalogSlotResolver
             $intentVector, $family, $subtype, $quantity,
             $globalChosen, $allowlistIds, $roomDimensions,
             $constraints, $roomType, $recall, null,
+            $prefetchMap[$slotKey.'|all'] ?? null,
         );
 
         return $this->buildSlotResult(
@@ -195,12 +207,15 @@ class CatalogSlotResolver
         string $roomType,
         int $recall,
         ?int $priorityMin,
+        ?array $prefetchedCandidates = null,
     ): array {
         $filter = $this->buildFilter($family, $allowlistIds, $subtype, $priorityMin);
         $candidates = [];
         $fallbackStage = null;
 
-        if ($intentVector !== []) {
+        if ($prefetchedCandidates !== null) {
+            $candidates = $prefetchedCandidates;
+        } elseif ($intentVector !== []) {
             try {
                 $candidates = $this->qdrant->search($intentVector, $recall, $filter);
             } catch (\Throwable $e) {
@@ -353,6 +368,85 @@ class CatalogSlotResolver
         }
 
         return array_slice($eligible, 0, $quantity);
+    }
+
+    /**
+     * @param  array<int, array{family?: string, subtype?: string|null, quantity?: int, placement?: string|null}>  $slots
+     * @param  array<int, int>|null  $allowlistIds
+     * @return array<string, array<int, array{product_id: int, score: float, payload: array<string, mixed>}>>
+     */
+    private function prefetchPrimaryCandidates(
+        array $intentVector,
+        array $slots,
+        ?array $allowlistIds,
+        int $recall,
+    ): array {
+        if ($intentVector === []) {
+            return [];
+        }
+
+        $searches = [];
+        $keys = [];
+
+        foreach ($slots as $slot) {
+            $family = trim((string) ($slot['family'] ?? ''));
+            if ($family === '') {
+                continue;
+            }
+
+            $subtype = isset($slot['subtype']) ? trim((string) $slot['subtype']) : null;
+            if ($subtype === '' || $subtype === 'other') {
+                $subtype = null;
+            }
+            $subtype = ProductSubtypeNormalizer::normalize($family, $subtype);
+            $slotKey = $this->slotPrefetchKey($family, $subtype);
+
+            $keys[] = $slotKey.'|priority';
+            $searches[] = [
+                'vector' => $intentVector,
+                'limit' => $recall,
+                'filterMust' => $this->buildFilter($family, $allowlistIds, $subtype, 1),
+            ];
+
+            $keys[] = $slotKey.'|all';
+            $searches[] = [
+                'vector' => $intentVector,
+                'limit' => $recall,
+                'filterMust' => $this->buildFilter($family, $allowlistIds, $subtype, null),
+            ];
+        }
+
+        if ($searches === []) {
+            return [];
+        }
+
+        try {
+            $batchResults = $this->qdrant->searchBatch($searches);
+        } catch (\Throwable $e) {
+            Log::warning('catalog.qdrant_batch_prefetch_failed', [
+                'search_count' => count($searches),
+                'message' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+
+        $map = [];
+        foreach ($keys as $index => $key) {
+            $map[$key] = $batchResults[$index] ?? [];
+        }
+
+        Log::info('catalog.qdrant_batch_prefetch', [
+            'search_count' => count($searches),
+            'slot_count' => (int) (count($searches) / 2),
+        ]);
+
+        return $map;
+    }
+
+    private function slotPrefetchKey(string $family, ?string $subtype): string
+    {
+        return $family.($subtype ? '/'.$subtype : '');
     }
 
     /**
