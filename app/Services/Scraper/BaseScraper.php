@@ -23,6 +23,13 @@ abstract class BaseScraper
 
     protected string $marketplace;
 
+    public function setDelaySeconds(int $seconds): static
+    {
+        $this->delaySeconds = max(1, $seconds);
+
+        return $this;
+    }
+
     /**
      * Timestamp of the last HTTP request to the marketplace.
      * Used to enforce minimum delay between ALL requests regardless of caller.

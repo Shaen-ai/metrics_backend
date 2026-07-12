@@ -77,6 +77,9 @@ tmp="$(mktemp)"
 grep -v '^VISTA_FILES_PATH=' .env >"$tmp" || true
 mv "$tmp" .env
 printf '%s\n' "VISTA_FILES_PATH=${VISTA_FILES_DIR}" >>.env
+# Keep secrets ubuntu-only. PHP-FPM must use config:cache (not live .env reads).
+chmod 600 .env
+chown ubuntu:ubuntu .env
 EOS
 
 $SSH "$SERVER" "cd '$REMOTE_DIR' \
@@ -86,6 +89,7 @@ $SSH "$SERVER" "cd '$REMOTE_DIR' \
   && php artisan view:cache \
   && sudo chown -R www-data:www-data storage bootstrap/cache \
   && sudo chmod -R 775 storage bootstrap/cache \
+  && test -f bootstrap/cache/config.php \
   && php artisan up \
   && (sudo systemctl reload '$PHP_FPM_SERVICE' || sudo systemctl restart '$PHP_FPM_SERVICE')"
 

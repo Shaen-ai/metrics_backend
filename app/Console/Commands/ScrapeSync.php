@@ -65,6 +65,17 @@ class ScrapeSync extends Command
             $requeued = $scraper->requeueStaleUrls($refreshDays, $this);
             $this->info("Re-queued {$requeued} stale URLs (>{$refreshDays} days old).");
 
+            // Vega historically concatenated qty digits into price; heal any leftovers
+            // that the stale-day window would otherwise skip.
+            if ($marketplace === 'vega') {
+                $this->call('scrape:repair-prices', [
+                    'marketplace' => 'vega',
+                    '--requeue-only' => true,
+                    '--min-price' => 1_000_000,
+                    '--prefix' => '11',
+                ]);
+            }
+
             $pending = ScrapeUrl::marketplace($marketplace)->pending()->count();
             $this->info("Pending URLs: {$pending}");
 
