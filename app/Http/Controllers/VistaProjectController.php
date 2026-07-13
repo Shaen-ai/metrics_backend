@@ -16,6 +16,10 @@ class VistaProjectController extends Controller
 {
     private const MAX_INSPIRATION_IMAGES = 4;
 
+    private const MAX_PLACEMENT_IMAGES = 4;
+
+    private const MAX_ROOM_EXTRA_IMAGES = 5;
+
     private function disk(): Filesystem
     {
         return Storage::disk('vista_files');
@@ -126,6 +130,217 @@ class VistaProjectController extends Controller
         }
 
         return $out;
+    }
+
+    /** @return list<array{path: string, label: string, mime: string, url: string, id?: string}> */
+    private function placementImagesFromPreferences(?array $preferences): array
+    {
+        if (! is_array($preferences)) {
+            return [];
+        }
+        $raw = $preferences['placementImages'] ?? [];
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($raw as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $path = $item['path'] ?? null;
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+            $entry = [
+                'path' => $path,
+                'label' => is_string($item['label'] ?? null) ? $item['label'] : '',
+                'mime' => is_string($item['mime'] ?? null) ? $item['mime'] : 'image/jpeg',
+                'url' => $this->fileUrl($path),
+            ];
+            if (is_string($item['id'] ?? null) && $item['id'] !== '') {
+                $entry['id'] = $item['id'];
+            }
+            $out[] = $entry;
+        }
+
+        return $out;
+    }
+
+    /** @return list<array{path: string, mime: string, url: string, id?: string}> */
+    private function roomExtraImagesFromPaths(?array $roomExtraPaths): array
+    {
+        if (! is_array($roomExtraPaths)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($roomExtraPaths as $item) {
+            if (is_string($item)) {
+                $path = $item;
+                $out[] = [
+                    'path' => $path,
+                    'mime' => 'image/jpeg',
+                    'url' => $this->fileUrl($path),
+                ];
+
+                continue;
+            }
+            if (! is_array($item)) {
+                continue;
+            }
+            $path = $item['path'] ?? null;
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+            $entry = [
+                'path' => $path,
+                'mime' => is_string($item['mime'] ?? null) ? $item['mime'] : 'image/jpeg',
+                'url' => $this->fileUrl($path),
+            ];
+            if (is_string($item['id'] ?? null) && $item['id'] !== '') {
+                $entry['id'] = $item['id'];
+            }
+            $out[] = $entry;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $incoming
+     * @param  array<string, mixed>|null  $existing
+     * @return array<string, mixed>
+     */
+    private function mergePreferences(?array $existing, array $incoming): array
+    {
+        $base = is_array($existing) ? $existing : [];
+
+        foreach ($incoming as $key => $value) {
+            if ($value === null) {
+                continue;
+            }
+            if ($key === 'quickRoomOptions' && is_array($value) && is_array($base['quickRoomOptions'] ?? null)) {
+                $base['quickRoomOptions'] = array_merge($base['quickRoomOptions'], $value);
+            } elseif ($key === 'quickRoomPhasedState' && is_array($value) && is_array($base['quickRoomPhasedState'] ?? null)) {
+                $base['quickRoomPhasedState'] = array_merge($base['quickRoomPhasedState'], $value);
+            } else {
+                $base[$key] = $value;
+            }
+        }
+
+        return $base;
+    }
+
+    private function applyRoomImageUpload(VistaProject $project, string $userId, string $base64, string $mime): void
+    {
+        $decoded = base64_decode($base64, true);
+        if ($decoded === false) {
+            return;
+        }
+
+        $ext = VistaFilePath::extensionFromMime($mime);
+        $path = VistaFilePath::uploadedRoomOriginal($userId, $project->id, $ext);
+        $this->disk()->put($path, $decoded);
+
+        $updates = ['room_image_path' => $path];
+        if (! $project->cover_image_path) {
+            $updates['cover_image_path'] = $path;
+        }
+        $project->update($updates);
+    }
+
+    /**
+     * @param  list<array{base64?: string, mime?: string, id?: string}>  $images
+     */
+    private function applyRoomExtraUpload(VistaProject $project, string $userId, array $images): void
+    {
+        $images = array_slice($images, 0, self::MAX_ROOM_EXTRA_IMAGES);
+        $previous = is_array($project->room_extra_paths) ? $project->room_extra_paths : [];
+        foreach ($previous as $old) {
+            $oldPath = is_array($old) ? ($old['path'] ?? null) : (is_string($old) ? $old : null);
+            if (is_string($oldPath) && $oldPath !== '') {
+                $this->disk()->delete($oldPath);
+            }
+        }
+
+        $stored = [];
+        foreach ($images as $index => $image) {
+            if (! is_array($image)) {
+                continue;
+            }
+            $base64 = $image['base64'] ?? null;
+            if (! is_string($base64) || $base64 === '') {
+                continue;
+            }
+            $decoded = base64_decode($base64, true);
+            if ($decoded === false) {
+                continue;
+            }
+            $mime = is_string($image['mime'] ?? null) ? $image['mime'] : 'image/jpeg';
+            $ext = VistaFilePath::extensionFromMime($mime);
+            $path = VistaFilePath::uploadedRoomExtra($userId, $project->id, $index, $ext);
+            $this->disk()->put($path, $decoded);
+            $entry = [
+                'path' => $path,
+                'mime' => $mime,
+            ];
+            if (is_string($image['id'] ?? null) && $image['id'] !== '') {
+                $entry['id'] = $image['id'];
+            }
+            $stored[] = $entry;
+        }
+
+        $project->update(['room_extra_paths' => $stored]);
+    }
+
+    /**
+     * @param  list<array{base64?: string, mime?: string, label?: string, id?: string}>  $images
+     */
+    private function applyPlacementUpload(VistaProject $project, string $userId, array $images): void
+    {
+        $images = array_slice($images, 0, self::MAX_PLACEMENT_IMAGES);
+        $preferences = is_array($project->preferences) ? $project->preferences : [];
+        $previous = $preferences['placementImages'] ?? [];
+        if (is_array($previous)) {
+            foreach ($previous as $old) {
+                if (is_array($old) && is_string($old['path'] ?? null) && $old['path'] !== '') {
+                    $this->disk()->delete($old['path']);
+                }
+            }
+        }
+
+        $stored = [];
+        foreach ($images as $index => $image) {
+            if (! is_array($image)) {
+                continue;
+            }
+            $base64 = $image['base64'] ?? null;
+            if (! is_string($base64) || $base64 === '') {
+                continue;
+            }
+            $decoded = base64_decode($base64, true);
+            if ($decoded === false) {
+                continue;
+            }
+            $mime = is_string($image['mime'] ?? null) ? $image['mime'] : 'image/jpeg';
+            $ext = VistaFilePath::extensionFromMime($mime);
+            $path = VistaFilePath::uploadedPlacement($userId, $project->id, $index, $ext);
+            $this->disk()->put($path, $decoded);
+            $label = is_string($image['label'] ?? null) ? $image['label'] : '';
+            $entry = [
+                'path' => $path,
+                'label' => $label,
+                'mime' => $mime,
+            ];
+            if (is_string($image['id'] ?? null) && $image['id'] !== '') {
+                $entry['id'] = $image['id'];
+            }
+            $stored[] = $entry;
+        }
+
+        $preferences['placementImages'] = $stored;
+        $project->update(['preferences' => $preferences]);
     }
 
     /**
@@ -314,20 +529,55 @@ class VistaProjectController extends Controller
             'floor_plan_analysis' => 'nullable|array',
             'floor_plan_base64' => 'nullable|string',
             'floor_plan_mime' => 'nullable|string|max:48',
+            'room_image_base64' => 'nullable|string',
+            'room_image_mime' => 'nullable|string|max:48',
             'preferences' => 'nullable|array',
             'pdf_path' => 'nullable|string|max:500',
             'inspiration_images' => 'nullable|array|max:'.self::MAX_INSPIRATION_IMAGES,
             'inspiration_images.*.base64' => 'required_with:inspiration_images|string',
             'inspiration_images.*.mime' => 'nullable|string|max:48',
             'inspiration_images.*.label' => 'nullable|string|max:255',
+            'room_extra_images' => 'nullable|array|max:'.self::MAX_ROOM_EXTRA_IMAGES,
+            'room_extra_images.*.base64' => 'required_with:room_extra_images|string',
+            'room_extra_images.*.mime' => 'nullable|string|max:48',
+            'room_extra_images.*.id' => 'nullable|string|max:64',
+            'placement_images' => 'nullable|array|max:'.self::MAX_PLACEMENT_IMAGES,
+            'placement_images.*.base64' => 'required_with:placement_images|string',
+            'placement_images.*.mime' => 'nullable|string|max:48',
+            'placement_images.*.label' => 'nullable|string|max:255',
+            'placement_images.*.id' => 'nullable|string|max:64',
         ]);
 
         $floorPlanBase64 = $data['floor_plan_base64'] ?? null;
         $floorPlanMime = $data['floor_plan_mime'] ?? 'image/jpeg';
+        $roomImageBase64 = $data['room_image_base64'] ?? null;
+        $roomImageMime = $data['room_image_mime'] ?? 'image/jpeg';
         $inspirationImages = $data['inspiration_images'] ?? null;
-        unset($data['floor_plan_base64'], $data['floor_plan_mime'], $data['inspiration_images']);
+        $roomExtraImages = $data['room_extra_images'] ?? null;
+        $placementImages = $data['placement_images'] ?? null;
+        $incomingPreferences = $data['preferences'] ?? null;
+        unset(
+            $data['floor_plan_base64'],
+            $data['floor_plan_mime'],
+            $data['room_image_base64'],
+            $data['room_image_mime'],
+            $data['inspiration_images'],
+            $data['room_extra_images'],
+            $data['placement_images'],
+            $data['preferences'],
+        );
+
+        if ($incomingPreferences !== null) {
+            $data['preferences'] = $this->mergePreferences($project->preferences, $incomingPreferences);
+        }
 
         $project->update(array_filter($data, fn ($v) => $v !== null));
+        $project->refresh();
+
+        if (! empty($roomImageBase64)) {
+            $this->applyRoomImageUpload($project, $request->user()->id, $roomImageBase64, $roomImageMime);
+            $project->refresh();
+        }
 
         if (! empty($floorPlanBase64)) {
             $this->applyFloorPlanUpload($project, $request->user()->id, $floorPlanBase64, $floorPlanMime);
@@ -338,6 +588,18 @@ class VistaProjectController extends Controller
             $this->applyInspirationUpload($project, $request->user()->id, $inspirationImages);
             $project->refresh();
         }
+
+        if ($roomExtraImages !== null) {
+            $this->applyRoomExtraUpload($project, $request->user()->id, $roomExtraImages);
+            $project->refresh();
+        }
+
+        if ($placementImages !== null) {
+            $this->applyPlacementUpload($project, $request->user()->id, $placementImages);
+            $project->refresh();
+        }
+
+        $project->update(['last_interaction_at' => now()]);
 
         return response()->json(['data' => $this->formatProjectDetail($project)]);
     }
@@ -378,9 +640,11 @@ class VistaProjectController extends Controller
             'design_brief' => 'nullable|array',
             'products_used' => 'nullable|array',
             'room_geometry' => 'nullable|array',
-            'type' => 'nullable|string|in:generated,edited,regenerated',
+            'type' => 'nullable|string|in:generated,edited,regenerated,phased,viewpoint',
             'room_id' => 'nullable|string|max:50',
             'angle_index' => 'nullable|integer|min:0|max:10',
+            'phase' => 'nullable|string|max:32',
+            'viewpoint_id' => 'nullable|string|max:64',
             'repair_missing' => 'nullable|boolean',
         ]);
 
@@ -401,6 +665,8 @@ class VistaProjectController extends Controller
         }
 
         $nextVersion = $project->version_count + 1;
+        $phase = $data['phase'] ?? null;
+        $viewpointId = $data['viewpoint_id'] ?? null;
 
         if ($project->mode === 'project' && ! empty($data['room_id'])) {
             $path = VistaFilePath::roomVersion(
@@ -411,11 +677,22 @@ class VistaProjectController extends Controller
                 $data['angle_index'] ?? 0,
                 $ext
             );
+        } elseif (is_string($phase) && $phase !== '') {
+            $path = VistaFilePath::generatedPhase($user->id, $project->id, $phase, $nextVersion, $ext);
+        } elseif (is_string($viewpointId) && $viewpointId !== '') {
+            $path = VistaFilePath::generatedViewpoint($user->id, $project->id, $viewpointId, $nextVersion, $ext);
         } else {
             $path = VistaFilePath::version($project->mode, $user->id, $project->id, $nextVersion, $ext);
         }
 
         $this->disk()->put($path, $decoded);
+
+        $versionRoomId = $data['room_id'] ?? null;
+        if ($versionRoomId === null && is_string($phase) && $phase !== '') {
+            $versionRoomId = $phase;
+        } elseif ($versionRoomId === null && is_string($viewpointId) && $viewpointId !== '') {
+            $versionRoomId = $viewpointId;
+        }
 
         $version = VistaProjectVersion::create([
             'project_id' => $project->id,
@@ -429,7 +706,7 @@ class VistaProjectController extends Controller
             'room_geometry' => $data['room_geometry'] ?? null,
             'version_number' => $nextVersion,
             'type' => $data['type'] ?? 'generated',
-            'room_id' => $data['room_id'] ?? null,
+            'room_id' => $versionRoomId,
             'angle_index' => $data['angle_index'] ?? 0,
             'created_at' => now(),
         ]);
@@ -597,6 +874,7 @@ class VistaProjectController extends Controller
             'status' => $project->status,
             'style' => $project->style,
             'room_image_url' => $this->resolveFileUrl($project->room_image_path),
+            'room_extra_images' => $this->roomExtraImagesFromPaths($project->room_extra_paths),
             'room_analysis' => $project->room_analysis,
             'room_geometry' => $project->room_geometry,
             'floor_plan_url' => $this->resolveFileUrl($project->floor_plan_path),
@@ -605,6 +883,7 @@ class VistaProjectController extends Controller
             'room_results' => $project->room_results,
             'preferences' => $project->preferences,
             'inspiration_images' => $this->inspirationImagesFromPreferences($project->preferences),
+            'placement_images' => $this->placementImagesFromPreferences($project->preferences),
             'pdf_url' => $project->pdf_path ? $this->fileUrl($project->pdf_path) : null,
             'message_count' => $project->message_count,
             'version_count' => $project->version_count,

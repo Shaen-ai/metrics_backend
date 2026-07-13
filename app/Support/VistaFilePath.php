@@ -36,6 +36,27 @@ class VistaFilePath
         return self::projectRoot($userId, $projectId)."/uploaded/inspiration/insp-{$index}.{$ext}";
     }
 
+    public static function uploadedPlacement(string $userId, string $projectId, int $index, string $ext = 'jpg'): string
+    {
+        return self::projectRoot($userId, $projectId)."/uploaded/placement/place-{$index}.{$ext}";
+    }
+
+    public static function generatedPhase(string $userId, string $projectId, string $phase, int $versionNum, string $ext = 'png'): string
+    {
+        $v = str_pad((string) $versionNum, 3, '0', STR_PAD_LEFT);
+        $safePhase = preg_replace('/[^a-z0-9_-]/i', '-', $phase) ?: 'unknown';
+
+        return self::projectRoot($userId, $projectId)."/generated/phases/{$safePhase}/v{$v}.{$ext}";
+    }
+
+    public static function generatedViewpoint(string $userId, string $projectId, string $photoId, int $versionNum, string $ext = 'png'): string
+    {
+        $v = str_pad((string) $versionNum, 3, '0', STR_PAD_LEFT);
+        $safeId = preg_replace('/[^a-z0-9_-]/i', '-', $photoId) ?: 'view';
+
+        return self::projectRoot($userId, $projectId)."/generated/viewpoints/{$safeId}/v{$v}.{$ext}";
+    }
+
     public static function version(string $mode, string $userId, string $projectId, int $versionNum, string $ext = 'png'): string
     {
         $v = str_pad((string) $versionNum, 3, '0', STR_PAD_LEFT);
