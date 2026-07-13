@@ -62,10 +62,10 @@ class PublicVistaShareController extends Controller
 
         $promptHistory = $project->messages
             ->filter(function (VistaProjectMessage $msg) {
-                if (! in_array($msg->role, ['user', 'assistant'], true)) {
+                if ($msg->role !== 'user') {
                     return false;
                 }
-                if (! in_array($msg->content_type, ['text', 'generation'], true)) {
+                if ($msg->content_type !== 'text') {
                     return false;
                 }
 
