@@ -8,7 +8,7 @@ REMOTE_OWNER="${REMOTE_OWNER:-ubuntu:ubuntu}"
 PERSISTENT_FILES_DIR="${PERSISTENT_FILES_DIR:-/var/www/tunzone/files}"
 PERSISTENT_MODEL_DIR="${PERSISTENT_MODEL_DIR:-$PERSISTENT_FILES_DIR/models}"
 PERSISTENT_IMAGE_DIR="${PERSISTENT_IMAGE_DIR:-$PERSISTENT_FILES_DIR/images}"
-VISTA_FILES_DIR="${VISTA_FILES_DIR:-/var/www/tunzone/vista}"
+VISTA_FILES_DIR="${VISTA_FILES_DIR:-/var/www/tunzone/vista/uploads}"
 CLEAN_LEGACY_STORAGE_MODELS="${CLEAN_LEGACY_STORAGE_MODELS:-1}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.4-fpm}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"
@@ -50,7 +50,8 @@ $SSH "$SERVER" "set -e \
   && sudo rm -rf '$REMOTE_DIR/storage/app/public/files/models' \
   && sudo chown -R '$REMOTE_OWNER' '$REMOTE_DIR' \
   && sudo chown -R www-data:www-data '$PERSISTENT_FILES_DIR' '$VISTA_FILES_DIR' '$REMOTE_DIR/storage' '$REMOTE_DIR/bootstrap/cache' \
-  && sudo chmod -R 775 '$PERSISTENT_FILES_DIR' '$VISTA_FILES_DIR' '$REMOTE_DIR/storage' '$REMOTE_DIR/bootstrap/cache'"
+  && sudo chmod -R 2775 '$PERSISTENT_FILES_DIR' '$VISTA_FILES_DIR' '$REMOTE_DIR/storage' '$REMOTE_DIR/bootstrap/cache' \
+  && sudo usermod -aG www-data ubuntu 2>/dev/null || true"
 
 echo "==> Installing and optimizing Laravel on server..."
 $SSH "$SERVER" "cd '$REMOTE_DIR' \

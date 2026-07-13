@@ -11,6 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use League\Flysystem\UnableToCreateDirectory;
+use League\Flysystem\UnableToWriteFile;
 
 class VistaProjectController extends Controller
 {
@@ -23,6 +25,27 @@ class VistaProjectController extends Controller
     private function disk(): Filesystem
     {
         return Storage::disk('vista_files');
+    }
+
+    private function putProjectFileOrFail(string $path, string $contents): ?JsonResponse
+    {
+        try {
+            if (! $this->disk()->put($path, $contents)) {
+                return response()->json([
+                    'message' => 'Failed to save project file. Storage may be misconfigured.',
+                    'code' => 'vista_storage_write_failed',
+                ], 503);
+            }
+        } catch (UnableToCreateDirectory|UnableToWriteFile $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Failed to save project file. Storage directory is not writable.',
+                'code' => 'vista_storage_not_writable',
+            ], 503);
+        }
+
+        return null;
     }
 
     private function fileUrl(string $path): string
@@ -464,7 +487,12 @@ class VistaProjectController extends Controller
             $decoded = base64_decode($data['room_image_base64'], true);
 
             if ($decoded !== false) {
-                $this->disk()->put($path, $decoded);
+                $writeError = $this->putProjectFileOrFail($path, $decoded);
+                if ($writeError !== null) {
+                    $project->delete();
+
+                    return $writeError;
+                }
                 $project->update([
                     'room_image_path' => $path,
                     'cover_image_path' => $path,
@@ -688,7 +716,10 @@ class VistaProjectController extends Controller
             $path = VistaFilePath::version($project->mode, $user->id, $project->id, $nextVersion, $ext);
         }
 
-        $this->disk()->put($path, $decoded);
+        $writeError = $this->putProjectFileOrFail($path, $decoded);
+        if ($writeError !== null) {
+            return $writeError;
+        }
 
         $versionRoomId = $data['room_id'] ?? null;
         if ($versionRoomId === null && is_string($phase) && $phase !== '') {
