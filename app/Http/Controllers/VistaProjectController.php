@@ -465,7 +465,10 @@ class VistaProjectController extends Controller
 
             if ($decoded !== false) {
                 $this->disk()->put($path, $decoded);
-                $project->update(['room_image_path' => $path]);
+                $project->update([
+                    'room_image_path' => $path,
+                    'cover_image_path' => $path,
+                ]);
 
                 // Add system message for room upload
                 VistaProjectMessage::create([
