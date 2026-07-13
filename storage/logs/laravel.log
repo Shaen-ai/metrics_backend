@@ -14835,3 +14835,26 @@ Laravel mail check
 [2026-07-10 20:03:39] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
 [2026-07-10 20:32:35] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
 [2026-07-12 22:48:38] testing.WARNING: Token top-up: unsupported currency {"currency":"eur","amount_subtotal_minor":10000} 
+[2026-07-13 20:27:46] local.ERROR: Exit:  Goodbye {"exception":"[object] (Psy\\Exception\\BreakException(code: 0): Exit:  Goodbye at /Users/shahen1/apps/mebel/backend/vendor/psy/psysh/src/Exception/BreakException.php:49)
+[stacktrace]
+#0 /Users/shahen1/apps/mebel/backend/vendor/psy/psysh/src/ExecutionClosure.php(41) : eval()'d code(4): Psy\\Exception\\BreakException::exitShell()
+#1 /Users/shahen1/apps/mebel/backend/vendor/psy/psysh/src/ExecutionClosure.php(41): eval()
+#2 /Users/shahen1/apps/mebel/backend/vendor/psy/psysh/src/ExecutionClosure.php(90): {closure:Psy\\ExecutionClosure::__construct():28}()
+#3 /Users/shahen1/apps/mebel/backend/vendor/psy/psysh/src/Shell.php(1878): Psy\\ExecutionClosure->execute()
+#4 /Users/shahen1/apps/mebel/backend/vendor/laravel/tinker/src/Console/TinkerCommand.php(77): Psy\\Shell->execute('\\n$p = App\\\\Model...')
+#5 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Laravel\\Tinker\\Console\\TinkerCommand->handle()
+#6 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::{closure:Illuminate\\Container\\BoundMethod::call():35}()
+#7 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(95): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#8 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#9 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Container/Container.php(696): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#10 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Console/Command.php(213): Illuminate\\Container\\Container->call(Array)
+#11 /Users/shahen1/apps/mebel/backend/vendor/symfony/console/Command/Command.php(341): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#12 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Console/Command.php(182): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#13 /Users/shahen1/apps/mebel/backend/vendor/symfony/console/Application.php(1117): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#14 /Users/shahen1/apps/mebel/backend/vendor/symfony/console/Application.php(356): Symfony\\Component\\Console\\Application->doRunCommand(Object(Laravel\\Tinker\\Console\\TinkerCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#15 /Users/shahen1/apps/mebel/backend/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#16 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#17 /Users/shahen1/apps/mebel/backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 /Users/shahen1/apps/mebel/backend/artisan(11): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#19 {main}
+"} 

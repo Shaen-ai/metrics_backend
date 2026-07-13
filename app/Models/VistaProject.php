@@ -18,6 +18,9 @@ class VistaProject extends Model
         'title',
         'cover_image_path',
         'status',
+        'share_enabled',
+        'share_token',
+        'share_enabled_at',
         'style',
         'room_image_path',
         'room_extra_paths',
@@ -45,6 +48,8 @@ class VistaProject extends Model
             'room_results' => 'array',
             'preferences' => 'array',
             'last_interaction_at' => 'datetime',
+            'share_enabled' => 'boolean',
+            'share_enabled_at' => 'datetime',
         ];
     }
 

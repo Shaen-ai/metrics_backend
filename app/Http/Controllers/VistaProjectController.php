@@ -971,4 +971,82 @@ class VistaProjectController extends Controller
 
         return $result;
     }
+
+    /**
+     * GET /api/vista/projects/{id}/share
+     */
+    public function shareStatus(Request $request, string $id): JsonResponse
+    {
+        $project = $this->findQuickRoomProjectForOwner($request, $id);
+
+        return response()->json(['data' => $this->formatShareStatus($project)]);
+    }
+
+    /**
+     * POST /api/vista/projects/{id}/share
+     */
+    public function enableShare(Request $request, string $id): JsonResponse
+    {
+        $project = $this->findQuickRoomProjectForOwner($request, $id);
+
+        $updates = [
+            'share_enabled' => true,
+            'share_enabled_at' => now(),
+        ];
+        if (! is_string($project->share_token) || $project->share_token === '') {
+            $updates['share_token'] = Str::random(48);
+        }
+
+        $project->update($updates);
+        $project->refresh();
+
+        return response()->json(['data' => $this->formatShareStatus($project)]);
+    }
+
+    /**
+     * DELETE /api/vista/projects/{id}/share
+     */
+    public function disableShare(Request $request, string $id): JsonResponse
+    {
+        $project = $this->findQuickRoomProjectForOwner($request, $id);
+
+        $project->update([
+            'share_enabled' => false,
+            'share_token' => Str::random(48),
+        ]);
+        $project->refresh();
+
+        return response()->json(['data' => $this->formatShareStatus($project)]);
+    }
+
+    private function findQuickRoomProjectForOwner(Request $request, string $id): VistaProject
+    {
+        return VistaProject::query()
+            ->where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->where('mode', 'quick_room')
+            ->firstOrFail();
+    }
+
+    /** @return array{enabled: bool, share_url: string|null, share_enabled_at: string|null} */
+    private function formatShareStatus(VistaProject $project): array
+    {
+        $enabled = (bool) $project->share_enabled;
+        $token = is_string($project->share_token) ? $project->share_token : null;
+
+        return [
+            'enabled' => $enabled,
+            'share_url' => ($enabled && $token !== null && $token !== '')
+                ? $this->buildShareUrl($token)
+                : null,
+            'share_enabled_at' => $project->share_enabled_at?->toISOString(),
+        ];
+    }
+
+    private function buildShareUrl(string $token): string
+    {
+        $origin = rtrim((string) env('VISTA_PUBLIC_ORIGIN', 'https://vista.tunzone.com'), '/');
+
+        return $origin.'/share/'.$token;
+    }
 }

@@ -29,6 +29,7 @@ use App\Http\Controllers\PlannerCustomDesignController;
 use App\Http\Controllers\PublicCatalogSlotController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\PublicReferralController;
+use App\Http\Controllers\PublicVistaShareController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UsageConsumeController;
@@ -54,6 +55,12 @@ Route::post('/tokens/check', [TokenController::class, 'check']);
 Route::post('/tokens/consume', [TokenController::class, 'consume']);
 
 Route::get('/public/referral/{code}', [PublicReferralController::class, 'show']);
+
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/public/vista/share/{token}', [PublicVistaShareController::class, 'show']);
+    Route::get('/public/vista/share/{token}/assets/{asset}', [PublicVistaShareController::class, 'asset'])
+        ->where('asset', '.*');
+});
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/register-consumer', [AuthController::class, 'registerConsumer']);
@@ -89,6 +96,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/vista/projects/{id}', [VistaProjectController::class, 'destroy']);
     Route::post('/vista/projects/{id}/versions', [VistaProjectController::class, 'addVersion']);
     Route::post('/vista/projects/{id}/messages', [VistaProjectController::class, 'addMessage']);
+    Route::get('/vista/projects/{id}/share', [VistaProjectController::class, 'shareStatus']);
+    Route::post('/vista/projects/{id}/share', [VistaProjectController::class, 'enableShare']);
+    Route::delete('/vista/projects/{id}/share', [VistaProjectController::class, 'disableShare']);
 });
 
 Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
