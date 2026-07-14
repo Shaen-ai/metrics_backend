@@ -18,14 +18,19 @@ class ContactFormMailable extends Mailable
         public string $senderName,
         public string $senderEmail,
         public string $bodyText,
+        public ?string $phone = null,
+        public ?string $source = null,
     ) {}
 
     public function envelope(): Envelope
     {
         $safeName = Str::limit(preg_replace('/[\r\n]+/', ' ', $this->senderName) ?? '', 100, '');
+        $subject = $this->source === 'vista_price_quote'
+            ? 'Vista price quote: '.$safeName
+            : 'Website contact: '.$safeName.' — '.config('mail.from.name');
 
         return new Envelope(
-            subject: 'Website contact: '.$safeName.' — '.config('mail.from.name'),
+            subject: $subject,
             replyTo: [
                 new Address($this->senderEmail, Str::limit($this->senderName, 70, '') ?: null),
             ],

@@ -7,6 +7,12 @@
 </head>
 <body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #111;">
     <p><strong>From:</strong> {{ $senderName }} &lt;{{ $senderEmail }}&gt;</p>
+    @if (!empty($phone))
+    <p><strong>Phone:</strong> {{ $phone }}</p>
+    @endif
+    @if (!empty($source))
+    <p><strong>Source:</strong> {{ $source }}</p>
+    @endif
     <p><strong>Message:</strong></p>
     <p style="white-space: pre-wrap;">{{ $bodyText }}</p>
 </body>
