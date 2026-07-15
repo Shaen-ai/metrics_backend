@@ -62,8 +62,10 @@ Route::middleware('throttle:60,1')->group(function () {
         ->where('asset', '.*');
 });
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/register-consumer', [AuthController::class, 'registerConsumer']);
+Route::post('/auth/register', [AuthController::class, 'register'])
+    ->middleware('silent.register.limit');
+Route::post('/auth/register-consumer', [AuthController::class, 'registerConsumer'])
+    ->middleware('silent.register.limit');
 Route::get('/auth/verify-email', [AuthController::class, 'verifyEmail']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/oauth/exchange', [SocialAuthController::class, 'exchange']);

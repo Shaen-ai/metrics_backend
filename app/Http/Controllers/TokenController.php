@@ -48,6 +48,15 @@ class TokenController extends Controller
             return response()->json(['message' => 'X-Vista-Device-Id header is required.'], 400);
         }
 
+        $user = $this->resolveUser($request);
+        if ($user instanceof User) {
+            return response()->json([
+                'data' => array_merge($this->tokenService->getBalance($user, $deviceId), [
+                    'granted' => false,
+                ]),
+            ]);
+        }
+
         $result = $this->tokenService->grantAnonymousIfNeeded($deviceId);
         $balance = $this->tokenService->getBalance(null, $deviceId);
 
