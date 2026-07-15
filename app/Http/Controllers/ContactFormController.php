@@ -19,6 +19,7 @@ class ContactFormController extends Controller
             'message' => ['required', 'string', 'max:5000'],
             'phone' => ['nullable', 'string', 'max:40'],
             'source' => ['nullable', 'string', 'max:64'],
+            'share_url' => ['nullable', 'url', 'max:512'],
         ]);
 
         $to = config('mail.contact_inbound.address');
@@ -37,6 +38,7 @@ class ContactFormController extends Controller
                 $data['message'],
                 $data['phone'] ?? null,
                 $data['source'] ?? null,
+                $data['share_url'] ?? null,
             ));
         } catch (Throwable $e) {
             Log::error('Contact form mail failed', [

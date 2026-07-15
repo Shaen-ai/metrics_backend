@@ -13,6 +13,9 @@
     @if (!empty($source))
     <p><strong>Source:</strong> {{ $source }}</p>
     @endif
+    @if (!empty($shareUrl))
+    <p><strong>Share URL:</strong> <a href="{{ $shareUrl }}">{{ $shareUrl }}</a></p>
+    @endif
     <p><strong>Message:</strong></p>
     <p style="white-space: pre-wrap;">{{ $bodyText }}</p>
 </body>

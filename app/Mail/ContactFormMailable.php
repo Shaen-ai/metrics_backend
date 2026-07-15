@@ -20,6 +20,7 @@ class ContactFormMailable extends Mailable
         public string $bodyText,
         public ?string $phone = null,
         public ?string $source = null,
+        public ?string $shareUrl = null,
     ) {}
 
     public function envelope(): Envelope
