@@ -16,14 +16,28 @@ class CountryDetector
      */
     public function detect(?string $ip): string
     {
+        return $this->detectWithMeta($ip)['country'];
+    }
+
+    /**
+     * @return array{country: string, detected: bool}
+     */
+    public function detectWithMeta(?string $ip): array
+    {
         if (! $ip || $this->isLocalIp($ip)) {
-            return $this->getDefault();
+            return [
+                'country' => $this->getDefault(),
+                'detected' => false,
+            ];
         }
 
         $cacheKey = "country_ip:{$ip}";
         $cached = Cache::get($cacheKey);
         if ($cached) {
-            return $cached;
+            return [
+                'country' => $cached,
+                'detected' => true,
+            ];
         }
 
         try {
@@ -40,22 +54,44 @@ class CountryDetector
                     $code = strtoupper($data['countryCode']);
                     Cache::put($cacheKey, $code, self::CACHE_TTL);
 
-                    return $code;
+                    return [
+                        'country' => $code,
+                        'detected' => true,
+                    ];
                 }
             }
         } catch (\Throwable $e) {
             Log::debug("CountryDetector: failed for IP {$ip}", ['error' => $e->getMessage()]);
         }
 
-        return $this->getDefault();
+        return [
+            'country' => $this->getDefault(),
+            'detected' => false,
+        ];
     }
 
     private function isLocalIp(string $ip): bool
     {
-        return in_array($ip, ['127.0.0.1', '::1', 'localhost'], true)
-            || str_starts_with($ip, '192.168.')
-            || str_starts_with($ip, '10.')
-            || str_starts_with($ip, '172.');
+        if (in_array($ip, ['127.0.0.1', '::1', 'localhost'], true)) {
+            return true;
+        }
+
+        if (str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
+            return true;
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $long = ip2long($ip);
+            if ($long !== false) {
+                $start = ip2long('172.16.0.0');
+                $end = ip2long('172.31.255.255');
+                if ($long >= $start && $long <= $end) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function getDefault(): string

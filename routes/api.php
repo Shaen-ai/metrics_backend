@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CatalogController as AdminCatalogController;
+use App\Http\Controllers\Admin\ImageController as AdminImageController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Billing\StripeCheckoutController;
@@ -213,3 +216,21 @@ Route::post('/paypal/ipn', [PaypalController::class, 'ipn']);
 
 Route::get('/billing/checkout', [StripeCheckoutController::class, 'redirect']);
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
+/*
+| Platform-owner oversight panel (the `overseer` app).
+| Gated by EnsurePlatformAdmin: requires an is_platform_admin Sanctum user AND the
+| X-Admin-Key secret header. Any failure returns 404, so the surface is undiscoverable.
+| Never deployed as a UI; endpoints live here because the DB is the source of truth.
+*/
+Route::prefix('admin')
+    ->middleware(['platform-admin', 'throttle:30,1'])
+    ->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::get('/users/{id}', [AdminUserController::class, 'show']);
+        Route::get('/users/{id}/images', [AdminImageController::class, 'index']);
+        Route::get('/users/{id}/catalog', [AdminCatalogController::class, 'index']);
+        Route::patch('/users/{id}/plan', [AdminUserController::class, 'updatePlan']);
+        Route::post('/users/{id}/tokens', [AdminUserController::class, 'adjustTokens']);
+        Route::delete('/images/{source}/{id}', [AdminImageController::class, 'destroy']);
+    });

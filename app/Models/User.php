@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'google_id',
         'user_type',
+        'is_platform_admin',
         'password',
         'name',
         'company_name',
@@ -64,6 +65,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'is_platform_admin',
     ];
 
     protected function casts(): array
@@ -71,6 +73,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_platform_admin' => 'boolean',
             'selected_sub_mode_ids' => 'array',
             'planner_material_ids' => 'array',
             'use_custom_planner_catalog' => 'boolean',

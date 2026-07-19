@@ -73,11 +73,12 @@ class LiveSearchController extends Controller
     {
         $detector = app(CountryDetector::class);
         $ip = $request->ip();
-        $country = $detector->detect($ip);
+        $result = $detector->detectWithMeta($ip);
 
         return response()->json([
             'data' => [
-                'country_code' => $country,
+                'country_code' => $result['country'],
+                'detected' => $result['detected'],
                 'ip' => $ip,
             ],
         ]);
