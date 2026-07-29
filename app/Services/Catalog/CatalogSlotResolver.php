@@ -259,9 +259,20 @@ class CatalogSlotResolver
         if (count($picked) < $quantity) {
             $fallbackStage = 1;
             $broadLimit = (int) config('catalog.qdrant.recall_limit_broad', 50);
+            // Widen the broad recall to a family-only filter (drop the subtype pin) so a
+            // slot whose exact subtype is out of stock can still be filled by a sibling in
+            // the same family — e.g. coffee_table -> side/console table, sofa -> sectional.
+            // Previously the broad recall reused the subtype-pinned $filter whenever the
+            // initial search returned any rows (even too few), so those siblings never
+            // entered the candidate pool and furniture slots came back empty, leaving Gemini
+            // to invent the hero furniture. Subtype boost + rerank still prefer exact matches
+            // when present; siblings only fill when the exact subtype is unavailable.
+            $broadFilter = ($subtype !== null && $subtype !== '')
+                ? $this->buildFilter($family, $allowlistIds, null, $priorityMin)
+                : $filter;
             if ($intentVector !== []) {
                 try {
-                    $candidates = $this->qdrant->search($intentVector, $broadLimit, $filter);
+                    $candidates = $this->qdrant->search($intentVector, $broadLimit, $broadFilter);
                 } catch (\Throwable $e) {
                     Log::warning('catalog.qdrant_search_broad_failed', [
                         'family' => $family,

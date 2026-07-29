@@ -57,8 +57,11 @@ class PublicVistaShareController extends Controller
             'image_url' => $this->assetPath($token, 'versions/'.rawurlencode($v->id)),
             'prompt_used' => $v->prompt_used,
             'feedback' => $v->feedback,
+            'products_used' => $v->products_used,
             'created_at' => $v->created_at?->toISOString(),
         ])->values();
+
+        $latestVersion = $project->versions->sortByDesc('version_number')->first();
 
         $promptHistory = $project->messages
             ->filter(function (VistaProjectMessage $msg) {
@@ -91,6 +94,7 @@ class PublicVistaShareController extends Controller
                 'draft_prompt' => $draftPrompt,
                 'room_image_url' => $roomImageUrl,
                 'versions' => $versions,
+                'products_used' => $latestVersion?->products_used,
                 'prompt_history' => $promptHistory,
             ],
         ]);

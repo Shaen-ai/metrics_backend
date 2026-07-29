@@ -306,6 +306,36 @@ class CatalogServicesTest extends TestCase
         $this->assertSame($tile->id, $relaxed['ranked'][0]['product_id']);
     }
 
+    public function test_rerank_relaxed_keeps_sibling_furniture_subtype_for_coffee_table_slot(): void
+    {
+        $this->ensureScrapedProductsTable();
+
+        // A real furniture piece of a sibling subtype (tv_stand) that should be able to
+        // fill a coffee_table slot when the exact subtype is out of stock, instead of the
+        // slot resolving empty and Gemini inventing the piece. The widened broad recall in
+        // CatalogSlotResolver feeds these siblings into this relaxed rerank stage.
+        $sibling = ScrapedProduct::create([
+            'source_marketplace' => 'domus',
+            'external_url' => 'https://domus.am/en/media-stand-test.html',
+            'name' => 'Low media stand',
+            'product_family' => 'furniture',
+            'product_subtype' => 'tv_stand',
+            'price' => 45000,
+        ]);
+
+        $reranker = new CatalogRerankService(new DimensionScorer);
+        $candidate = [['product_id' => $sibling->id, 'score' => 0.9, 'payload' => []]];
+
+        // Strict rejection (default): the tv_stand is rejected for a coffee_table slot.
+        $strict = $reranker->rerank($candidate, 'furniture', 'coffee_table', [], [], [], true, '', true);
+        $this->assertCount(0, $strict['ranked']);
+
+        // Relaxed fallback: the sibling furniture survives so the slot is not left empty.
+        $relaxed = $reranker->rerank($candidate, 'furniture', 'coffee_table', [], [], [], false, '', false);
+        $this->assertCount(1, $relaxed['ranked']);
+        $this->assertSame($sibling->id, $relaxed['ranked'][0]['product_id']);
+    }
+
     public function test_taxonomy_classifier_tags_vase_and_excludes_cookware(): void
     {
         $classifier = new ProductTaxonomyClassifier;
