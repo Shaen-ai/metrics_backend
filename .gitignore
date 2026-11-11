@@ -27,6 +27,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local tooling
+.local/
 .DS_Store
 Homestead.json
 Homestead.yaml

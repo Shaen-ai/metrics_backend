@@ -14,9 +14,11 @@ use App\Http\Controllers\ColorDetectorController;
 use App\Http\Controllers\ContactFormController;
 use App\Http\Controllers\DesignProjectController;
 use App\Http\Controllers\ErrorReportController;
+use App\Http\Controllers\FeatureRequestController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\InteriorDesignController;
 use App\Http\Controllers\InternalNotificationController;
+use App\Http\Controllers\StorefrontFloorPlanController;
 use App\Http\Controllers\InternalTokenConsumeController;
 use App\Http\Controllers\InternalUsageConsumeController;
 use App\Http\Controllers\LiveSearchController;
@@ -29,6 +31,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaypalController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\PlannerCustomDesignController;
+use App\Http\Controllers\SofaArchitectController;
 use App\Http\Controllers\PublicCatalogSlotController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\PublicReferralController;
@@ -138,6 +141,9 @@ Route::middleware(['auth:sanctum', 'subscribed'])->group(function () {
     Route::get('/planners/custom-design/load', [PlannerCustomDesignController::class, 'load']);
     Route::post('/planners/custom-design/submit', [PlannerCustomDesignController::class, 'submit']);
 
+    Route::post('/sofa-architect/analyze', [SofaArchitectController::class, 'analyze'])
+        ->middleware('throttle:20,1');
+
     Route::post('/interior-design/sessions', [InteriorDesignController::class, 'createSession']);
     Route::get('/interior-design/sessions', [InteriorDesignController::class, 'listSessions']);
     Route::get('/interior-design/sessions/{id}', [InteriorDesignController::class, 'showSession']);
@@ -154,6 +160,9 @@ Route::get('/public/material-templates', [MaterialTemplateController::class, 'in
 
 Route::post('/contact', [ContactFormController::class, 'store'])
     ->middleware('throttle:20,1');
+
+Route::post('/feature-requests', [FeatureRequestController::class, 'store'])
+    ->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -194,6 +203,11 @@ Route::prefix('public/{slug}')->group(function () {
     Route::post('/orders', [PublicController::class, 'submitOrder']);
     Route::post('/planner-surface-image', [UploadController::class, 'storePlannerSurfaceImage'])
         ->middleware('throttle:20,1');
+
+    Route::post('/floor-plans', [StorefrontFloorPlanController::class, 'store'])
+        ->middleware('throttle:12,1');
+    Route::patch('/floor-plans/{id}', [StorefrontFloorPlanController::class, 'update']);
+    Route::get('/floor-plans/{id}', [StorefrontFloorPlanController::class, 'show']);
 });
 
 Route::post('/internal/usage/consume', [InternalUsageConsumeController::class, 'consume']);
