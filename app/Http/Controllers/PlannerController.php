@@ -15,12 +15,22 @@ use RuntimeException;
 
 class PlannerController extends Controller
 {
+    use Concerns\DetectsUploadFailures;
+
     public function generate(
         PlanGenerateRequest $request,
         ImageContextService $imageContext,
         IntentParserService $intentParser,
         FurnitureEngine $engine,
     ): JsonResponse {
+        // Catch PHP-level upload failures before Laravel validation
+        foreach (['room_image', 'inspiration_image'] as $field) {
+            $bad = $this->invalidUploadResponse($field, $request->file($field));
+            if ($bad !== null) {
+                return $bad;
+            }
+        }
+
         $admin = $request->plannerAdmin();
         $validated = $request->validated();
         $planRequest = $imageContext->build(

@@ -69,7 +69,7 @@ class TokenTopUpService
             ];
         }
 
-        return DB::transaction(function () use ($user, $sessionId, $tokens, $subtotalMinor, $currency, $session) {
+        return DB::transaction(function () use ($user, $sessionId, $tokens, $subtotalMinor, $currency, $session, $minorUnitsPerToken) {
             $existing = TokenTransaction::query()
                 ->where('user_id', $user->id)
                 ->where('type', 'stripe_topup')
@@ -112,7 +112,7 @@ class TokenTopUpService
                     'amount_major' => StripeCurrency::toMajorUnits($subtotalMinor, $currency),
                     'currency' => $currency,
                     'currency_exponent' => StripeCurrency::minorUnitExponent($currency),
-                    'amount_tax_minor' => (int) ($session->total_details->amount_tax ?? 0),
+                    'amount_tax_minor' => (int) ($session->total_details?->amount_tax ?? 0),
                     'amount_total_minor' => (int) ($session->amount_total ?? 0),
                     'minor_units_per_token' => $minorUnitsPerToken,
                     'amd_per_token' => $this->tokenService->amdPerToken(),

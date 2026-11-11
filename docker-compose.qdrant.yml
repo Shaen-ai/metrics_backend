@@ -1,5 +1,6 @@
 # Local Qdrant for catalog vector retrieval.
 # Start: docker compose -f docker-compose.qdrant.yml up -d
+# No Docker: bash ../scripts/start-qdrant-local.sh (from repo root)
 # Set backend/.env: QDRANT_URL=http://127.0.0.1:6333
 
 services:
