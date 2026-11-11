@@ -26,8 +26,10 @@ FROM base AS runtime
 COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
 
-RUN composer dump-autoload --optimize \
-    && mkdir -p bootstrap/cache storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
+RUN mkdir -p bootstrap/cache storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
+    && cp .env.example .env \
+    && composer dump-autoload --optimize \
+    && rm -f .env \
     && mkdir -p /var/www/tunzone/files/models /var/www/tunzone/files/images /var/www/tunzone/files/vista \
     && chown -R www-data:www-data storage bootstrap/cache /var/www/tunzone/files
 
