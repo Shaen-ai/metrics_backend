@@ -27,6 +27,7 @@ COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
 
 RUN composer dump-autoload --optimize \
+    && mkdir -p bootstrap/cache storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
     && mkdir -p /var/www/tunzone/files/models /var/www/tunzone/files/images /var/www/tunzone/files/vista \
     && chown -R www-data:www-data storage bootstrap/cache /var/www/tunzone/files
 
